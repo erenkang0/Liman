@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Liman</string>
+    <string name="app_tagline">Zihnine ve bağlarına bir liman</string>
+
+    <!-- Alt navigasyon -->
+    <string name="nav_today">Bugün</string>
+    <string name="nav_me">Ben</string>
+    <string name="nav_bonds">Bağlar</string>
+    <string name="nav_insight">İçgörü</string>
+
+    <!-- Genel -->
+    <string name="action_skip">Atla</string>
+    <string name="action_continue">Devam</string>
+    <string name="action_back">Geri</string>
+    <string name="action_save">Kaydet</string>
+    <string name="action_start">Başlat</string>
+    <string name="action_settings">Ayarlar</string>
+
+    <!-- Kilit -->
+    <string name="lock_title">İç dünyan kilitli</string>
+    <string name="lock_subtitle">Devam etmek için kimliğini doğrula</string>
+    <string name="lock_biometric_hint">Yüz tanıma da hazır</string>
+    <string name="lock_pin_hint">Ya da PIN ile gir</string>
+</resources>

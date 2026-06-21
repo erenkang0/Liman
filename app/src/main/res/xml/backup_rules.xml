@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+   Yedekleme kuralları. Şifreli günlük içerikleri ve anahtarlar cihaz dışına
+   çıkmamalı; bu yüzden hassas dosyalar yedeklemeden hariç tutulur.
+-->
+<full-backup-content>
+    <exclude domain="sharedpref" path="liman_secure_prefs.xml" />
+    <exclude domain="file" path="datastore/" />
+</full-backup-content>
