@@ -23,14 +23,14 @@ object Routes {
     const val JOURNAL_EDITOR = "journal_editor"
     const val ADD_CONTACT = "add_contact"
 
-    const val EDIT_CONTACT = "edit_contact"
-    fun editContact(id: String) = "$EDIT_CONTACT/$id"
-    const val EDIT_CONTACT_ROUTE = "$EDIT_CONTACT/{$CONTACT_ARG}"
-
     const val CONTACT = "contact"
     const val CONTACT_ARG = "contactId"
     fun contact(id: String) = "$CONTACT/$id"
     const val CONTACT_ROUTE = "$CONTACT/{$CONTACT_ARG}"
+
+    const val EDIT_CONTACT = "edit_contact"
+    fun editContact(id: String) = "$EDIT_CONTACT/$id"
+    const val EDIT_CONTACT_ROUTE = "$EDIT_CONTACT/{$CONTACT_ARG}"
 
     const val JOURNAL_VIEWER = "journal_viewer"
     const val JOURNAL_ARG = "journalId"
