@@ -52,6 +52,14 @@ Tasarım dili **Material 3 (Material You)**, sıcak **krem yüzeyler**, turuncu 
 
 ---
 
+## 🆕 Sürüm 1.5.0 yenilikleri
+
+- 🎨 **Tüm emojiler ikonlara dönüştü** — ruh hali ve duygusal hava artık tutarlı Material ikonları.
+- 🔒 **Kilit ekranı sıfırdan yeniden tasarlandı** — minimal; parmak izi/yüz tuşu doğrudan tuş takımında.
+- 🖼️ **Profil fotoğrafı** — Ayarlar'dan seç, Bugün avatarında görün.
+- 🔎 **Arama** · 📤 **Veri dışa aktarma** · 📅 **Haftalık rapor** · 🏷️ **Günlük etiketleri** · 💞 **İletişim ritmi**
+- 🧼 İlk açılışta örnek/test verisi yok; sıfırdan senin verinle başlar.
+
 ## 🧭 Bilgi mimarisi
 
 Alt navigasyonda **4 sekme** ve her ekranda davranışı değişen **uyarlanabilir bir `+` (FAB)**:
@@ -147,9 +155,10 @@ git push origin v1.0.0   # → GitHub Release + APK
 - [x] Gerçek bildirim planlaması (WorkManager) + başlangıçta izin
 - [x] Cinsiyete duyarlı yazı tonu
 - [x] Sakinleş (SOS / topraklanma) modu
+- [x] Arama, dışa aktarma, haftalık rapor, günlük etiketleri, iletişim ritmi
+- [x] Zengin metin günlük + sesli not + afiş fotoğraf
 - [ ] Room + SQLCipher ile kalıcı şifreli depolama
-- [ ] Google Fotoğraflar ve takvim entegrasyonu
-- [ ] Yedekleme / dışa aktarma
+- [ ] Takvim entegrasyonu
 
 ---
 
