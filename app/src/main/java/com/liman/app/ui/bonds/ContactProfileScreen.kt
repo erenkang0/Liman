@@ -5,6 +5,7 @@ import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -27,10 +28,14 @@ import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.Cake
 import androidx.compose.material.icons.rounded.Chat
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Done
+import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Link
 import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,6 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +65,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.liman.app.data.model.EmotionalWeather
 import com.liman.app.data.model.Memory
+import com.liman.app.data.model.RelationshipType
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.AnimatedEntrance
 import com.liman.app.ui.components.Avatar
@@ -69,7 +76,9 @@ import com.liman.app.ui.components.SectionHeader
 import com.liman.app.ui.components.WeatherDot
 import com.liman.app.ui.components.weatherColor
 import com.liman.app.ui.theme.LocalLimanColors
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -91,6 +100,14 @@ fun ContactProfileScreen(
     var noteDraft by remember(contactId, contact?.weatherNote) { mutableStateOf(contact?.weatherNote ?: "") }
     var viewerIndex by remember { mutableStateOf<Int?>(null) }
 
+    // Satır içi düzenleme (kişi ekranının içinde)
+    var editing by remember { mutableStateOf(false) }
+    var nameDraft by remember(contactId) { mutableStateOf("") }
+    var bioDraft by remember(contactId) { mutableStateOf("") }
+    var relDraft by remember(contactId) { mutableStateOf(RelationshipType.FRIEND) }
+    var birthdayDraft by remember(contactId) { mutableStateOf<LocalDate?>(null) }
+    var showEditDate by remember { mutableStateOf(false) }
+
     val albumPicker = rememberLauncherForActivityResult(
         ActivityResultContracts.PickMultipleVisualMedia(5),
     ) { uris ->
@@ -106,6 +123,36 @@ fun ContactProfileScreen(
             TopAppBar(
                 title = { Text(contact?.name ?: "Kişi") },
                 navigationIcon = { BackButton(onBack) },
+                actions = {
+                    if (contact != null) {
+                        IconButton(onClick = {
+                            if (editing) {
+                                viewModel.repository.upsertContact(
+                                    contact.copy(
+                                        name = nameDraft.trim().ifBlank { contact.name },
+                                        bio = bioDraft.trim(),
+                                        relationship = relDraft,
+                                        birthday = birthdayDraft,
+                                    )
+                                )
+                                editing = false
+                            } else {
+                                nameDraft = contact.name
+                                bioDraft = contact.bio
+                                relDraft = contact.relationship
+                                birthdayDraft = contact.birthday
+                                editing = true
+                            }
+                        }) {
+                            Icon(
+                                if (editing) Icons.Rounded.Done else Icons.Rounded.Edit,
+                                contentDescription = if (editing) "Kaydet" else "Düzenle",
+                                tint = if (editing) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
@@ -150,21 +197,59 @@ fun ContactProfileScreen(
 
             Column(Modifier.padding(horizontal = 20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                 AnimatedEntrance(delayMillis = 60) {
-                    Column {
-                        Text(contact.name, style = MaterialTheme.typography.headlineMedium)
-                        Spacer(Modifier.height(4.dp))
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            WeatherDot(contact.weather, size = 12)
-                            Spacer(Modifier.width(6.dp))
-                            Text(
-                                "${contact.weather.label} · ${contact.relationship.label}",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface,
-                            )
-                        }
-                        if (contact.bio.isNotBlank()) {
-                            Spacer(Modifier.height(8.dp))
-                            Text(contact.bio, style = MaterialTheme.typography.bodyMedium)
+                    Crossfade(targetState = editing, label = "contactHeader") { edit ->
+                        if (edit) {
+                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                OutlinedTextField(
+                                    value = nameDraft,
+                                    onValueChange = { nameDraft = it },
+                                    label = { Text("İsim") },
+                                    singleLine = true,
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                                OutlinedTextField(
+                                    value = bioDraft,
+                                    onValueChange = { bioDraft = it },
+                                    label = { Text("Kısa not / bio") },
+                                    modifier = Modifier.fillMaxWidth(),
+                                )
+                                Text("İlişki", style = MaterialTheme.typography.titleSmall)
+                                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    RelationshipType.entries.forEach { type ->
+                                        FilterChip(
+                                            selected = relDraft == type,
+                                            onClick = { relDraft = type },
+                                            label = { Text(type.label) },
+                                        )
+                                    }
+                                }
+                                OutlinedButton(onClick = { showEditDate = true }, modifier = Modifier.fillMaxWidth()) {
+                                    Text(birthdayDraft?.let { "Doğum günü: ${it.format(dayMonthYear)}" } ?: "Doğum günü seç")
+                                }
+                                Text(
+                                    "Yukarıdaki ✓ ile kaydet.",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        } else {
+                            Column {
+                                Text(contact.name, style = MaterialTheme.typography.headlineMedium)
+                                Spacer(Modifier.height(4.dp))
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    WeatherDot(contact.weather, size = 12)
+                                    Spacer(Modifier.width(6.dp))
+                                    Text(
+                                        "${contact.weather.label} · ${contact.relationship.label}",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                    )
+                                }
+                                if (contact.bio.isNotBlank()) {
+                                    Spacer(Modifier.height(8.dp))
+                                    Text(contact.bio, style = MaterialTheme.typography.bodyMedium)
+                                }
+                            }
                         }
                     }
                 }
@@ -365,6 +450,22 @@ fun ContactProfileScreen(
                 showAlbumDialog = false
             },
         )
+    }
+
+    if (showEditDate) {
+        val state = rememberDatePickerState()
+        DatePickerDialog(
+            onDismissRequest = { showEditDate = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    state.selectedDateMillis?.let {
+                        birthdayDraft = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                    }
+                    showEditDate = false
+                }) { Text("Tamam") }
+            },
+            dismissButton = { TextButton(onClick = { showEditDate = false }) { Text("Vazgeç") } },
+        ) { DatePicker(state = state) }
     }
 
     viewerIndex?.let { idx ->

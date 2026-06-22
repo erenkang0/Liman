@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -35,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.liman.app.data.model.Contact
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.Avatar
+import com.liman.app.ui.components.BloomIcon
 import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.components.SectionHeader
 import com.liman.app.ui.components.WeatherDot
@@ -95,12 +97,16 @@ fun BondsScreen(
         if (contacts.isEmpty()) {
             item {
                 LimanCard(Modifier.fillMaxWidth()) {
-                    Text(
-                        "Henüz bir bağ eklemedin. Sağ alttaki + ile başlayabilirsin.",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(18.dp),
-                    )
+                    Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+                        BloomIcon(modifier = Modifier.size(40.dp), tint = LocalLimanColors.current.bondAccent)
+                        Spacer(Modifier.width(14.dp))
+                        Text(
+                            "Henüz bir bağ eklemedin. Sağ alttaki + ile başlayabilirsin.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f),
+                        )
+                    }
                 }
             }
         } else {

@@ -1,0 +1,20 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="48dp"
+    android:height="48dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <group
+        android:name="bloom"
+        android:pivotX="12"
+        android:pivotY="12">
+        <!-- Merkez -->
+        <path
+            android:fillColor="#FFFFFF"
+            android:pathData="M12,12 m-2.6,0 a2.6,2.6 0 1,0 5.2,0 a2.6,2.6 0 1,0 -5.2,0" />
+        <!-- Yapraklar (4 yön + çapraz) -->
+        <path android:fillColor="#FFFFFF" android:pathData="M12,2.2 m-1.8,0 a1.8,2.8 0 1,0 3.6,0 a1.8,2.8 0 1,0 -3.6,0" />
+        <path android:fillColor="#FFFFFF" android:pathData="M12,21.8 m-1.8,0 a1.8,2.8 0 1,0 3.6,0 a1.8,2.8 0 1,0 -3.6,0" />
+        <path android:fillColor="#FFFFFF" android:pathData="M2.2,12 m0,-1.8 a2.8,1.8 0 1,0 0,3.6 a2.8,1.8 0 1,0 0,-3.6" />
+        <path android:fillColor="#FFFFFF" android:pathData="M21.8,12 m0,-1.8 a2.8,1.8 0 1,0 0,3.6 a2.8,1.8 0 1,0 0,-3.6" />
+    </group>
+</vector>

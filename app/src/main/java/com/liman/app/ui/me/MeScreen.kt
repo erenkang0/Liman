@@ -42,6 +42,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.liman.app.data.model.JournalEntry
 import com.liman.app.ui.LimanViewModel
+import com.liman.app.ui.components.BloomIcon
 import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.components.SectionHeader
 import com.liman.app.ui.components.moodIcon
@@ -126,12 +127,19 @@ fun MeScreen(
         SectionHeader("Geçmiş yazılar", subtitle = "${journals.size} kayıt")
         if (journals.isEmpty()) {
             LimanCard(Modifier.fillMaxWidth()) {
-                Text(
-                    copy.meEmptyJournals,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(18.dp),
-                )
+                Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
+                    BloomIcon(
+                        modifier = Modifier.size(40.dp),
+                        tint = MaterialTheme.colorScheme.primary,
+                    )
+                    Spacer(Modifier.width(14.dp))
+                    Text(
+                        copy.meEmptyJournals,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                }
             }
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

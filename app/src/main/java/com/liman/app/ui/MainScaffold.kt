@@ -261,7 +261,7 @@ fun MainScaffold(
                         viewModel = viewModel,
                         onAddContact = { rootNavController.navigate(Routes.ADD_CONTACT) },
                         onOpenContact = { rootNavController.navigate(Routes.contact(it)) },
-                        onEditContact = { rootNavController.navigate(Routes.editContact(it)) },
+                        onEditContact = { rootNavController.navigate(Routes.contact(it)) },
                     )
 
                     Tab.INSIGHT -> InsightScreen(
