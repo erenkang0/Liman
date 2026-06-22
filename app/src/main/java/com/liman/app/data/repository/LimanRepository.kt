@@ -5,7 +5,10 @@ import com.liman.app.data.model.Contact
 import com.liman.app.data.model.EmotionalWeather
 import com.liman.app.data.model.GratitudeEntry
 import com.liman.app.data.model.JournalEntry
+import com.liman.app.data.model.JournalFont
 import com.liman.app.data.model.Memory
+import com.liman.app.data.model.StyleSpan
+import com.liman.app.data.model.VoiceNote
 import com.liman.app.data.model.MoodEntry
 import com.liman.app.data.model.MoodFace
 import com.liman.app.data.model.MoodIntensity
@@ -74,17 +77,21 @@ class LimanRepository(
     fun addJournal(
         title: String,
         body: String,
-        moodFace: MoodFace?,
-        hasAudio: Boolean = false,
-        photoCount: Int = 0,
+        spans: List<StyleSpan> = emptyList(),
+        font: JournalFont = JournalFont.SERIF,
+        moodFace: MoodFace? = null,
+        voice: VoiceNote? = null,
+        photos: List<String> = emptyList(),
     ) {
         val entry = JournalEntry(
             id = newId(),
             title = title,
             body = crypto.encrypt(body),
+            spans = spans,
+            font = font,
             moodFace = moodFace,
-            hasAudio = hasAudio,
-            photoCount = photoCount,
+            voice = voice,
+            photos = photos.take(5),
         )
         _storedJournals.update { (listOf(entry) + it).sortedByDescending { j -> j.timestamp } }
     }
@@ -128,8 +135,20 @@ class LimanRepository(
         _contacts.update { list -> list.map { if (it.id == id) it.copy(lastContact = date) else it } }
     }
 
-    fun addMemory(contactId: String, title: String, note: String) {
-        val memory = Memory(id = newId(), title = title, note = note)
+    fun addMemory(
+        contactId: String,
+        title: String,
+        note: String,
+        photos: List<String> = emptyList(),
+        voice: VoiceNote? = null,
+    ) {
+        val memory = Memory(
+            id = newId(),
+            title = title,
+            note = note,
+            photos = photos.take(5),
+            voice = voice,
+        )
         _contacts.update { list ->
             list.map { if (it.id == contactId) it.copy(memories = listOf(memory) + it.memories) else it }
         }
@@ -212,8 +231,10 @@ class LimanRepository(
                 id = newId(),
                 title = title,
                 body = crypto.encrypt(body),
+                // İlk örnekte ilk cümleyi kalın göstererek zengin metni örnekle.
+                spans = if (i == 0) listOf(StyleSpan(0, 24, bold = true)) else emptyList(),
+                font = JournalFont.SERIF,
                 moodFace = mood,
-                photoCount = if (i == 0) 2 else 0,
                 timestamp = now.minusDays((i * 2 + 1).toLong()).withHour(22),
             )
         }
@@ -231,7 +252,6 @@ class LimanRepository(
                 weatherNote = "Son görüşmemiz çok iyiydi, içim ısındı.",
                 birthday = today.plusDays(4),
                 lastContact = today.minusDays(2),
-                photoCount = 12,
                 memories = listOf(
                     Memory(newId(), "Sahil yürüyüşü", "Saatlerce konuştuk.", today.minusDays(20)),
                     Memory(newId(), "Doğum günü sürprizi", "", today.minusMonths(6)),
@@ -245,7 +265,6 @@ class LimanRepository(
                 bio = "Abim. Sakin ve güven veren.",
                 birthday = today.plusDays(31),
                 lastContact = today.minusDays(9),
-                photoCount = 4,
             ),
             Contact(
                 id = newId(),
@@ -255,7 +274,6 @@ class LimanRepository(
                 bio = "Lise arkadaşım. Bir süredir konuşamadık.",
                 weatherNote = "Aramızda küçük bir mesafe var, yakında aramalıyım.",
                 lastContact = today.minusDays(38),
-                photoCount = 0,
             ),
             Contact(
                 id = newId(),

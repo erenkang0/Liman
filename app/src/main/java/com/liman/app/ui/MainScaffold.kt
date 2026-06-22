@@ -252,6 +252,7 @@ fun MainScaffold(
                             viewModel = viewModel,
                             onNewJournal = { rootNavController.navigate(Routes.JOURNAL_EDITOR) },
                             onOpenTool = { rootNavController.navigate(it) },
+                            onOpenJournal = { rootNavController.navigate(Routes.journal(it)) },
                         )
                     }
 

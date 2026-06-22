@@ -28,6 +28,17 @@ object Routes {
     fun contact(id: String) = "$CONTACT/$id"
     const val CONTACT_ROUTE = "$CONTACT/{$CONTACT_ARG}"
 
+    const val JOURNAL_VIEWER = "journal_viewer"
+    const val JOURNAL_ARG = "journalId"
+    fun journal(id: String) = "$JOURNAL_VIEWER/$id"
+    const val JOURNAL_VIEWER_ROUTE = "$JOURNAL_VIEWER/{$JOURNAL_ARG}"
+
+    const val MEMORY = "memory"
+    const val MEMORY_CONTACT_ARG = "memContactId"
+    const val MEMORY_ARG = "memoryId"
+    fun memory(contactId: String, memoryId: String) = "$MEMORY/$contactId/$memoryId"
+    const val MEMORY_ROUTE = "$MEMORY/{$MEMORY_CONTACT_ARG}/{$MEMORY_ARG}"
+
     // Ben sekmesi araçları
     const val TOOL_BREATHING = "tool_breathing"
     const val TOOL_THOUGHT = "tool_thought"

@@ -1,10 +1,13 @@
 package com.liman.app.ui.me
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -12,39 +15,31 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.EditNote
+import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.Psychology
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.VolunteerActivism
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.liman.app.data.model.JournalEntry
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.LimanCard
@@ -53,7 +48,6 @@ import com.liman.app.ui.components.bounceClick
 import com.liman.app.ui.components.screenPadding
 import com.liman.app.ui.copy.LocalCopy
 import com.liman.app.ui.navigation.Routes
-import com.liman.app.ui.theme.JournalBodyStyle
 import com.liman.app.ui.theme.LocalLimanColors
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -69,16 +63,15 @@ private val tools = listOf(
     ToolItem("Sakinleş", Icons.Rounded.Spa, Routes.CALM),
 )
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MeScreen(
     viewModel: LimanViewModel,
     onNewJournal: () -> Unit,
     onOpenTool: (String) -> Unit,
+    onOpenJournal: (String) -> Unit,
 ) {
     val journals by viewModel.repository.journals.collectAsStateWithLifecycle()
     val copy = LocalCopy.current
-    var reading by remember { mutableStateOf<JournalEntry?>(null) }
 
     Column(
         Modifier
@@ -103,10 +96,7 @@ fun MeScreen(
                 Column(Modifier.weight(1f)) {
                     Text("Bugüne yaz", style = MaterialTheme.typography.titleLarge)
                     Spacer(Modifier.height(4.dp))
-                    Text(
-                        copy.meWriteDesc,
-                        style = MaterialTheme.typography.bodyMedium,
-                    )
+                    Text(copy.meWriteDesc, style = MaterialTheme.typography.bodyMedium)
                 }
                 Box(
                     Modifier.size(48.dp).clip(CircleShape)
@@ -145,42 +135,8 @@ fun MeScreen(
         } else {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 journals.forEach { entry ->
-                    JournalCard(entry) { reading = entry }
+                    JournalCard(entry) { onOpenJournal(entry.id) }
                 }
-            }
-        }
-    }
-
-    if (reading != null) {
-        val entry = reading!!
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        ModalBottomSheet(
-            onDismissRequest = { reading = null },
-            sheetState = sheetState,
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
-        ) {
-            Column(
-                Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp)
-                    .padding(bottom = 32.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        entry.title.ifBlank { "Günlük" },
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.weight(1f),
-                    )
-                    entry.moodFace?.let { Text(it.emoji, style = MaterialTheme.typography.headlineSmall) }
-                }
-                Text(
-                    entry.timestamp.format(longDateFormatter),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-                Text(entry.body, style = JournalBodyStyle)
             }
         }
     }
@@ -230,35 +186,50 @@ private fun ToolChip(tool: ToolItem, onClick: () -> Unit) {
 @Composable
 private fun JournalCard(entry: JournalEntry, onClick: () -> Unit) {
     LimanCard(Modifier.fillMaxWidth(), onClick = onClick) {
-        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    entry.title.ifBlank { "Günlük" },
-                    style = MaterialTheme.typography.titleMedium,
-                    modifier = Modifier.weight(1f),
+        Column {
+            entry.coverPhoto?.let { cover ->
+                AsyncImage(
+                    model = cover,
+                    contentDescription = "Afiş",
+                    contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(16f / 9f)
+                        .clip(RoundedCornerShape(topStart = 26.dp, topEnd = 26.dp)),
                 )
-                entry.moodFace?.let { Text(it.emoji) }
             }
-            Text(
-                entry.preview,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    entry.timestamp.format(shortDateFormatter),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f),
-                )
-                if (entry.photoCount > 0) {
-                    Icon(Icons.Rounded.PhotoLibrary, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.width(4.dp))
-                    Text("${entry.photoCount}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(Modifier.width(10.dp))
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        entry.title.ifBlank { "Günlük" },
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.weight(1f),
+                    )
+                    entry.moodFace?.let { Text(it.emoji) }
                 }
-                if (entry.hasAudio) {
-                    Icon(Icons.Rounded.Mic, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (entry.preview.isNotBlank()) {
+                    Text(
+                        entry.preview,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
+                }
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        entry.timestamp.format(shortDateFormatter),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.weight(1f),
+                    )
+                    if (entry.photos.isNotEmpty()) {
+                        Icon(Icons.Rounded.PhotoLibrary, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.width(4.dp))
+                        Text("${entry.photos.size}", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Spacer(Modifier.width(10.dp))
+                    }
+                    if (entry.voice != null) {
+                        Icon(Icons.Rounded.GraphicEq, null, modifier = Modifier.size(16.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
                 }
             }
         }
@@ -266,4 +237,3 @@ private fun JournalCard(entry: JournalEntry, onClick: () -> Unit) {
 }
 
 private val shortDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMM yyyy", Locale("tr"))
-private val longDateFormatter: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy · HH:mm", Locale("tr"))

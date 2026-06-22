@@ -19,7 +19,9 @@ import com.liman.app.ui.bonds.ContactProfileScreen
 import com.liman.app.ui.calm.CalmScreen
 import com.liman.app.ui.lock.LockReason
 import com.liman.app.ui.lock.LockScreen
+import com.liman.app.ui.bonds.MemoryDetailScreen
 import com.liman.app.ui.me.JournalEditorScreen
+import com.liman.app.ui.me.JournalViewerScreen
 import com.liman.app.ui.mood.MoodEntryScreen
 import com.liman.app.ui.navigation.Routes
 import com.liman.app.ui.onboarding.OnboardingScreen
@@ -126,6 +128,34 @@ private fun LimanNavHost(viewModel: LimanViewModel) {
             ContactProfileScreen(
                 viewModel = viewModel,
                 contactId = id,
+                onBack = { navController.popBackStack() },
+                onOpenMemory = { memoryId -> navController.navigate(Routes.memory(id, memoryId)) },
+            )
+        }
+
+        composable(
+            route = Routes.JOURNAL_VIEWER_ROUTE,
+            arguments = listOf(navArgument(Routes.JOURNAL_ARG) { type = NavType.StringType }),
+        ) { entry ->
+            val id = entry.arguments?.getString(Routes.JOURNAL_ARG).orEmpty()
+            JournalViewerScreen(
+                viewModel = viewModel,
+                journalId = id,
+                onBack = { navController.popBackStack() },
+            )
+        }
+
+        composable(
+            route = Routes.MEMORY_ROUTE,
+            arguments = listOf(
+                navArgument(Routes.MEMORY_CONTACT_ARG) { type = NavType.StringType },
+                navArgument(Routes.MEMORY_ARG) { type = NavType.StringType },
+            ),
+        ) { entry ->
+            MemoryDetailScreen(
+                viewModel = viewModel,
+                contactId = entry.arguments?.getString(Routes.MEMORY_CONTACT_ARG).orEmpty(),
+                memoryId = entry.arguments?.getString(Routes.MEMORY_ARG).orEmpty(),
                 onBack = { navController.popBackStack() },
             )
         }

@@ -27,7 +27,12 @@ data class Memory(
     val title: String,
     val note: String = "",
     val date: LocalDate = LocalDate.now(),
-)
+    /** Yerel fotoğraf URI'leri (en fazla 5). İlk fotoğraf "afiş" (kapak) olur. */
+    val photos: List<String> = emptyList(),
+    val voice: VoiceNote? = null,
+) {
+    val coverPhoto: String? get() = photos.firstOrNull()
+}
 
 data class Contact(
     val id: String,
@@ -39,7 +44,10 @@ data class Contact(
     val birthday: LocalDate? = null,
     val lastContact: LocalDate? = null,
     val memories: List<Memory> = emptyList(),
-    val photoCount: Int = 0,
+    /** Yerel albüm fotoğrafları (en fazla 5). */
+    val photos: List<String> = emptyList(),
+    /** Herhangi bir albüm bağlantısı (Google Fotoğraflar, iCloud, vb.). */
+    val albumUrl: String? = null,
     /** Avatar baş harfleri için renk tonu (0..1, hue türetmede kullanılır). */
     val avatarSeed: Int = name.hashCode(),
 ) {
