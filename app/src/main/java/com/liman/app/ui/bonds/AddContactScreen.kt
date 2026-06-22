@@ -34,6 +34,7 @@ import com.liman.app.data.model.EmotionalWeather
 import com.liman.app.data.model.RelationshipType
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
+import com.liman.app.ui.components.WeatherDot
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -112,7 +113,8 @@ fun AddContactScreen(
                         FilterChip(
                             selected = weather == w,
                             onClick = { weather = w },
-                            label = { Text("${w.emoji} ${w.label}") },
+                            label = { Text(w.label) },
+                            leadingIcon = { WeatherDot(w, size = 12) },
                         )
                     }
                 }

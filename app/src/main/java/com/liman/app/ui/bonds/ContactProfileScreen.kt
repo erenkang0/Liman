@@ -66,6 +66,7 @@ import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.FullscreenPhotoViewer
 import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.components.SectionHeader
+import com.liman.app.ui.components.WeatherDot
 import com.liman.app.ui.components.weatherColor
 import com.liman.app.ui.theme.LocalLimanColors
 import java.time.LocalDate
@@ -151,11 +152,16 @@ fun ContactProfileScreen(
                 AnimatedEntrance(delayMillis = 60) {
                     Column {
                         Text(contact.name, style = MaterialTheme.typography.headlineMedium)
-                        Text(
-                            "${contact.weather.emoji} ${contact.relationship.label}",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
+                        Spacer(Modifier.height(4.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            WeatherDot(contact.weather, size = 12)
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                "${contact.weather.label} · ${contact.relationship.label}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                            )
+                        }
                         if (contact.bio.isNotBlank()) {
                             Spacer(Modifier.height(8.dp))
                             Text(contact.bio, style = MaterialTheme.typography.bodyMedium)
@@ -167,7 +173,7 @@ fun ContactProfileScreen(
                     Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                         ActionButton("Görüştük", Icons.Rounded.CheckCircle, Modifier.weight(1f)) {
                             viewModel.repository.logContact(contact.id)
-                            notice = "Son temas bugüne güncellendi 💛"
+                            notice = "Son temas bugüne güncellendi"
                         }
                         ActionButton("Mesaj", Icons.Rounded.Chat, Modifier.weight(1f)) {
                             runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("sms:"))) }
@@ -213,7 +219,8 @@ fun ContactProfileScreen(
                                     FilterChip(
                                         selected = contact.weather == w,
                                         onClick = { viewModel.repository.upsertContact(contact.copy(weather = w)) },
-                                        label = { Text("${w.emoji} ${w.label}") },
+                                        label = { Text(w.label) },
+                                        leadingIcon = { WeatherDot(w, size = 12) },
                                     )
                                 }
                             }

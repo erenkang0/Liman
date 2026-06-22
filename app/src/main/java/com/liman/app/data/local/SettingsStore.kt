@@ -45,6 +45,7 @@ class SettingsStore(private val context: Context) {
                 name = this[Keys.name].orEmpty(),
                 birthDate = birthEpoch?.let { LocalDate.ofEpochDay(it) },
                 gender = this[Keys.gender]?.let { runCatching { Gender.valueOf(it) }.getOrNull() },
+                photoUri = this[Keys.photoUri],
             ),
             onboarded = this[Keys.onboarded] ?: false,
             themeMode = this[Keys.themeMode]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
@@ -67,6 +68,7 @@ class SettingsStore(private val context: Context) {
         this[Keys.name] = s.profile.name
         s.profile.birthDate?.let { this[Keys.birthDate] = it.toEpochDay() }
         s.profile.gender?.let { this[Keys.gender] = it.name }
+        s.profile.photoUri?.let { this[Keys.photoUri] = it }
         this[Keys.themeMode] = s.themeMode.name
         this[Keys.themePalette] = s.themePalette.name
         this[Keys.dynamicColor] = s.dynamicColor
@@ -82,6 +84,7 @@ class SettingsStore(private val context: Context) {
         val name = stringPreferencesKey("profile_name")
         val birthDate = longPreferencesKey("profile_birth")
         val gender = stringPreferencesKey("profile_gender")
+        val photoUri = stringPreferencesKey("profile_photo")
         val themeMode = stringPreferencesKey("theme_mode")
         val themePalette = stringPreferencesKey("theme_palette")
         val dynamicColor = booleanPreferencesKey("dynamic_color")

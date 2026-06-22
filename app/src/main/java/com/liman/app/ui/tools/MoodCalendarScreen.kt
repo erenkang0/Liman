@@ -43,6 +43,7 @@ import com.liman.app.data.model.MoodFace
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.LimanCard
+import com.liman.app.ui.components.moodIcon
 import com.liman.app.ui.theme.LocalLimanColors
 import java.time.LocalDate
 import java.time.YearMonth
@@ -156,7 +157,12 @@ private fun CalendarGrid(month: YearMonth, byDate: Map<LocalDate, MoodFace>) {
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     if (face != null) {
-                                        Text(face.emoji, fontSize = 18.sp)
+                                        Icon(
+                                            moodIcon(face),
+                                            contentDescription = face.label,
+                                            tint = colors.moodColor(face.score),
+                                            modifier = Modifier.size(22.dp),
+                                        )
                                     } else {
                                         Text(
                                             "${date.dayOfMonth}",
@@ -196,11 +202,16 @@ private fun MonthSummary(monthMoods: List<MoodEntry>) {
                 val top = monthMoods.groupingBy { it.face }.eachCount().maxByOrNull { it.value }?.key
 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(face.emoji, fontSize = 36.sp)
+                    Icon(
+                        moodIcon(face),
+                        contentDescription = face.label,
+                        tint = LocalLimanColors.current.moodColor(face.score),
+                        modifier = Modifier.size(40.dp),
+                    )
                     Spacer(Modifier.size(12.dp))
                     Column {
                         Text("Ortalama: ${face.label} (%.1f/5)".format(avg), style = MaterialTheme.typography.titleMedium)
-                        Text("$loggedDays gün kayıt · en sık ${top?.emoji ?: ""}", style = MaterialTheme.typography.bodyMedium)
+                        Text("$loggedDays gün kayıt · en sık ${top?.label ?: "—"}", style = MaterialTheme.typography.bodyMedium)
                     }
                 }
             }

@@ -40,11 +40,11 @@ interface LimanCopy {
 
 object GentleCopy : LimanCopy {
     override val moodQuestion = "Bugün nasıl hissediyorsun?"
-    override val moodSaved = "Kaydedildi 🌱"
+    override val moodSaved = "Kaydedildi"
     override val innerWorldTitle = "İç dünyan"
     override val innerWorldDesc = "Bugüne yaz — savunmasız, mahrem, yalnızca senin."
     override val bondsSubtitle = "Sıcak tutmaya değer ilişkiler"
-    override val bondsAllGood = "Şimdilik her şey yolunda görünüyor. 💛"
+    override val bondsAllGood = "Şimdilik her şey yolunda görünüyor."
     override val meWriteDesc = "Aklından geçeni, olduğu gibi. Burası yalnızca senin."
     override val meEmptyJournals =
         "Henüz bir şey yazmadın — ve bu tamamen senin tempon. Hazır olduğunda buradayız."
@@ -60,7 +60,7 @@ object GentleCopy : LimanCopy {
     )
     override val gratitudeIntro =
         "Seri yok, baskı yok. Sadece bugün fark ettiğin küçük güzellikler."
-    override val gratitudeEmpty = "Henüz bir şey eklemedin. Acelesi yok. 🌿"
+    override val gratitudeEmpty = "Henüz bir şey eklemedin. Acelesi yok."
     override val lockInnerSubtitle =
         "Ham, savunmasız duyguların güvende. Devam etmek için doğrula"
     override val notificationsNote =
@@ -72,11 +72,11 @@ object GentleCopy : LimanCopy {
 
 object GroundedCopy : LimanCopy {
     override val moodQuestion = "Bugün ne durumdasın?"
-    override val moodSaved = "Kaydedildi 👍"
+    override val moodSaved = "Kaydedildi"
     override val innerWorldTitle = "Senin alanın"
     override val innerWorldDesc = "Bugüne yaz — tamamen sana özel, kimse görmez."
     override val bondsSubtitle = "İletişimde kalmaya değer kişiler"
-    override val bondsAllGood = "Şu an her şey yolunda. 👍"
+    override val bondsAllGood = "Şu an her şey yolunda."
     override val meWriteDesc = "Aklından geçeni yaz. Burası sana özel, kimse okumaz."
     override val meEmptyJournals = "Henüz yazı yok. Canın istediğinde başlarsın."
     override val toolsSubtitle = "Kafanı toparlamak için araçlar"
@@ -90,7 +90,7 @@ object GroundedCopy : LimanCopy {
         "Bugünü tek kelimeyle anlat.",
     )
     override val gratitudeIntro = "Seri yok, baskı yok. Bugün iyi giden birkaç şey."
-    override val gratitudeEmpty = "Henüz bir şey yok. Acelesi yok. 👍"
+    override val gratitudeEmpty = "Henüz bir şey yok. Acelesi yok."
     override val lockInnerSubtitle = "Notların sana özel. Devam etmek için doğrula"
     override val notificationsNote =
         "Tek bir saat yok — her bildirimin kendi ayarı var. Yazmazsan da sorun yok."

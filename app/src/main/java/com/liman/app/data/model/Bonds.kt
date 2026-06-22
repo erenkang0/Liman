@@ -3,13 +3,13 @@ package com.liman.app.data.model
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
-/** Kişiyle ilişkinin "duygusal havası" — renkli nokta olarak gösterilir. */
-enum class EmotionalWeather(val label: String, val emoji: String) {
-    SUNNY("Güneşli", "☀️"),
-    WARM("Ilık", "🌤️"),
-    CALM("Sakin", "🌥️"),
-    CLOUDY("Bulutlu", "☁️"),
-    STORMY("Fırtınalı", "🌧️"),
+/** Kişiyle ilişkinin "duygusal havası" — renkli nokta + ikon olarak gösterilir. */
+enum class EmotionalWeather(val label: String) {
+    SUNNY("Güneşli"),
+    WARM("Ilık"),
+    CALM("Sakin"),
+    CLOUDY("Bulutlu"),
+    STORMY("Fırtınalı"),
 }
 
 /** İlişki türü etiketi. */

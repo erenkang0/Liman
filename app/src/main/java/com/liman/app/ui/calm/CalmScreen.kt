@@ -145,7 +145,7 @@ fun CalmScreen(
                             }
                         } else {
                             Text(
-                                "Aferin. Şu an buradasın. 💚",
+                                "Aferin. Şu an buradasın.",
                                 style = MaterialTheme.typography.titleMedium,
                                 textAlign = TextAlign.Center,
                             )

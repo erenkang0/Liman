@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -39,6 +40,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil.compose.AsyncImage
 import com.liman.app.data.model.MoodFace
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.AnimatedEntrance
@@ -107,7 +109,11 @@ fun TodayScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                ProfileAvatar(initial = name.firstOrNull()?.uppercase() ?: "", onClick = onOpenSettings)
+                ProfileAvatar(
+                    photoUri = settings.profile.photoUri,
+                    initial = name.firstOrNull()?.uppercase() ?: "",
+                    onClick = onOpenSettings,
+                )
             }
         }
 
@@ -235,7 +241,7 @@ fun TodayScreen(
                                 icon = Icons.Rounded.Cake,
                                 title = upcomingBirthday.name,
                                 subtitle = when (days) {
-                                    0L -> "Bugün doğum günü! 🎉"
+                                    0L -> "Bugün doğum günü!"
                                     1L -> "Yarın doğum günü"
                                     else -> "$days gün sonra doğum günü"
                                 },
@@ -266,7 +272,7 @@ fun TodayScreen(
 }
 
 @Composable
-private fun ProfileAvatar(initial: String, onClick: () -> Unit) {
+private fun ProfileAvatar(photoUri: String?, initial: String, onClick: () -> Unit) {
     Box(
         Modifier
             .size(46.dp)
@@ -275,10 +281,15 @@ private fun ProfileAvatar(initial: String, onClick: () -> Unit) {
             .bounceClick { onClick() },
         contentAlignment = Alignment.Center,
     ) {
-        if (initial.isBlank()) {
-            Icon(Icons.Rounded.WavingHand, "Ayarlar", tint = MaterialTheme.colorScheme.onPrimaryContainer)
-        } else {
-            Text(
+        when {
+            photoUri != null -> AsyncImage(
+                model = photoUri,
+                contentDescription = "Profil — ayarlar",
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+            initial.isBlank() -> Icon(Icons.Rounded.WavingHand, "Ayarlar", tint = MaterialTheme.colorScheme.onPrimaryContainer)
+            else -> Text(
                 initial,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
                 style = MaterialTheme.typography.titleMedium,

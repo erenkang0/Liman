@@ -13,9 +13,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -40,7 +44,9 @@ import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.Avatar
 import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.components.SectionHeader
+import com.liman.app.ui.components.moodIcon
 import com.liman.app.ui.components.weatherColor
+import com.liman.app.ui.components.weatherIcon
 import com.liman.app.ui.theme.LocalLimanColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -87,7 +93,11 @@ fun InsightScreen(
         LimanCard(Modifier.fillMaxWidth(), containerColor = MaterialTheme.colorScheme.primaryContainer, contentColor = MaterialTheme.colorScheme.onPrimaryContainer) {
             Row(Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {
                 val face = avg?.let { MoodFace.fromScore(Math.round(it).toInt()) }
-                Text(face?.emoji ?: "🌱", style = MaterialTheme.typography.displayMedium)
+                Icon(
+                    if (face != null) moodIcon(face) else Icons.Rounded.Spa,
+                    contentDescription = face?.label,
+                    modifier = Modifier.size(48.dp),
+                )
                 Spacer(Modifier.width(16.dp))
                 Column {
                     Text(
@@ -181,7 +191,12 @@ fun InsightScreen(
                                 }
                             }
                             Spacer(Modifier.width(10.dp))
-                            Text(contact.weather.emoji)
+                            Icon(
+                                weatherIcon(contact.weather),
+                                contentDescription = contact.weather.label,
+                                tint = weatherColor(contact.weather),
+                                modifier = Modifier.size(20.dp),
+                            )
                         }
                     }
                 }
@@ -244,7 +259,12 @@ private fun MoodDistribution(distribution: Map<MoodFace, Int>, modifier: Modifie
                         .background(colors.moodColor(face.score)),
                 )
                 Spacer(Modifier.height(6.dp))
-                Text(face.emoji)
+                Icon(
+                    moodIcon(face),
+                    contentDescription = face.label,
+                    tint = colors.moodColor(face.score),
+                    modifier = Modifier.size(20.dp),
+                )
             }
         }
     }

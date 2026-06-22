@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
@@ -44,9 +45,11 @@ import com.liman.app.ui.components.FullscreenPhotoViewer
 import com.liman.app.ui.components.PhotoThumbStrip
 import com.liman.app.ui.components.SectionHeader
 import com.liman.app.ui.components.VoiceNotePlayer
+import com.liman.app.ui.components.moodIcon
 import com.liman.app.ui.me.rich.buildJournalAnnotated
 import com.liman.app.ui.me.rich.toFontFamily
 import com.liman.app.ui.theme.JournalBodyStyle
+import com.liman.app.ui.theme.LocalLimanColors
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -138,7 +141,18 @@ fun JournalViewerScreen(
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.weight(1f),
                         )
-                        entry.moodFace?.let { Text("${it.emoji} ${it.label}", style = MaterialTheme.typography.labelLarge) }
+                        entry.moodFace?.let {
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                Icon(
+                                    moodIcon(it),
+                                    contentDescription = it.label,
+                                    tint = LocalLimanColors.current.moodColor(it.score),
+                                    modifier = Modifier.size(18.dp),
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Text(it.label, style = MaterialTheme.typography.labelLarge)
+                            }
+                        }
                     }
 
                     entry.voice?.let { voice ->

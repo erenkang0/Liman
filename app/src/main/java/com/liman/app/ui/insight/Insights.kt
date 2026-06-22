@@ -61,9 +61,9 @@ fun buildInsightShareText(moods: List<MoodEntry>, name: String): String {
     val face = avg?.let { MoodFace.fromScore(Math.round(it).toInt()) }
     val who = if (name.isBlank()) "Bu hafta" else "$name · bu hafta"
     return buildString {
-        appendLine("🌅 Liman — $who")
+        appendLine("Liman — $who")
         if (avg != null && face != null) {
-            appendLine("Ortalama ruh halim: ${face.emoji} ${face.label} (${"%.1f".format(avg)}/5)")
+            appendLine("Ortalama ruh halim: ${face.label} (${"%.1f".format(avg)}/5)")
             appendLine("${recent.size} kayıt ile kendime göz kulak oldum.")
         } else {
             appendLine("Bu hafta kendime nazikçe alan açıyorum.")

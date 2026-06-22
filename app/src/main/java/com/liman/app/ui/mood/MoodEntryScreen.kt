@@ -21,6 +21,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -49,6 +50,7 @@ import com.liman.app.data.model.MoodTrigger
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.MoodFaceRow
+import com.liman.app.ui.components.moodIcon
 import com.liman.app.ui.theme.LocalLimanColors
 import kotlin.math.roundToInt
 
@@ -94,7 +96,7 @@ fun MoodEntryScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-            // Büyük, nefes alan, halo'lu emoji
+            // Büyük, nefes alan, halo'lu ruh hali ikonu
             Box(
                 Modifier.fillMaxWidth().height(220.dp),
                 contentAlignment = Alignment.Center,
@@ -111,7 +113,12 @@ fun MoodEntryScreen(
                         ),
                     contentAlignment = Alignment.Center,
                 ) {
-                    Text(face.emoji, fontSize = 92.sp)
+                    Icon(
+                        moodIcon(face),
+                        contentDescription = face.label,
+                        tint = moodColor,
+                        modifier = Modifier.size(96.dp),
+                    )
                 }
             }
 

@@ -1,23 +1,31 @@
 package com.liman.app.ui.settings
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PhotoCamera
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -45,6 +53,8 @@ import com.liman.app.data.model.NotificationPrefs
 import com.liman.app.data.model.ThemeMode
 import com.liman.app.data.model.ThemePalette
 import com.liman.app.ui.LimanViewModel
+import androidx.compose.ui.text.font.FontWeight
+import coil.compose.AsyncImage
 import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.copy.LocalCopy
@@ -84,6 +94,14 @@ fun SettingsScreen(
         ) {
             // Profil
             SettingsGroup("Profil") {
+                Box(Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                    ProfilePhotoPicker(
+                        photoUri = settings.profile.photoUri,
+                        name = settings.profile.name,
+                        onPick = { uri -> viewModel.updateProfile(settings.profile.copy(photoUri = uri)) },
+                    )
+                }
+                Spacer(Modifier.height(14.dp))
                 OutlinedTextField(
                     value = nameDraft,
                     onValueChange = { nameDraft = it },
@@ -271,6 +289,55 @@ fun SettingsScreen(
             confirmButton = { TextButton(onClick = { showDeleteDialog = false }) { Text("Vazgeç") } },
             dismissButton = {},
         )
+    }
+}
+
+@Composable
+private fun ProfilePhotoPicker(photoUri: String?, name: String, onPick: (String) -> Unit) {
+    val picker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickVisualMedia(),
+    ) { uri -> if (uri != null) onPick(uri.toString()) }
+
+    Box(
+        Modifier
+            .size(96.dp)
+            .clip(CircleShape)
+            .background(MaterialTheme.colorScheme.primaryContainer)
+            .clickable {
+                picker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            },
+        contentAlignment = Alignment.Center,
+    ) {
+        if (photoUri != null) {
+            AsyncImage(
+                model = photoUri,
+                contentDescription = "Profil fotoğrafı",
+                contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                modifier = Modifier.fillMaxSize(),
+            )
+        } else {
+            Text(
+                name.firstOrNull()?.uppercase() ?: "",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+        Box(
+            Modifier
+                .align(Alignment.BottomEnd)
+                .size(30.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary),
+            contentAlignment = Alignment.Center,
+        ) {
+            Icon(
+                Icons.Rounded.PhotoCamera,
+                contentDescription = "Fotoğraf seç",
+                tint = MaterialTheme.colorScheme.onPrimary,
+                modifier = Modifier.size(16.dp),
+            )
+        }
     }
 }
 

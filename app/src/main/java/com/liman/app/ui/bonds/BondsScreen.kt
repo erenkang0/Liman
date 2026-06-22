@@ -136,7 +136,7 @@ private fun BirthdayCard(contact: Contact, today: LocalDate, onClick: () -> Unit
             Text(contact.name, style = MaterialTheme.typography.titleSmall, textAlign = TextAlign.Center, maxLines = 1)
             Text(
                 when (days) {
-                    0L -> "Bugün! 🎉"
+                    0L -> "Bugün!"
                     1L -> "Yarın"
                     else -> "$days gün"
                 },
@@ -169,10 +169,7 @@ private fun ContactRow(
             }
             Spacer(Modifier.width(14.dp))
             Column(Modifier.weight(1f)) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(contact.name, style = MaterialTheme.typography.titleMedium, modifier = Modifier.weight(1f))
-                    if (!editMode) Text(contact.weather.emoji)
-                }
+                Text(contact.name, style = MaterialTheme.typography.titleMedium)
                 val since = contact.daysSinceContact(today)
                 Text(
                     when {

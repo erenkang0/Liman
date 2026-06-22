@@ -5,14 +5,15 @@ import java.time.LocalDateTime
 
 /**
  * 5 yüz ifadeli hızlı ruh hali seçici için temel ifadeler.
+ * Görsel (ikon) eşlemesi UI katmanındadır (bkz. ui/components/MoodVisuals).
  * [score] 1 (çok düşük) .. 5 (çok iyi).
  */
-enum class MoodFace(val score: Int, val emoji: String, val label: String) {
-    VERY_LOW(1, "😔", "Zor"),
-    LOW(2, "🙁", "İniş"),
-    NEUTRAL(3, "😐", "Dengede"),
-    GOOD(4, "🙂", "İyi"),
-    GREAT(5, "😄", "Harika");
+enum class MoodFace(val score: Int, val label: String) {
+    VERY_LOW(1, "Zor"),
+    LOW(2, "İniş"),
+    NEUTRAL(3, "Dengede"),
+    GOOD(4, "İyi"),
+    GREAT(5, "Harika");
 
     companion object {
         fun fromScore(score: Int): MoodFace = entries.firstOrNull { it.score == score } ?: NEUTRAL

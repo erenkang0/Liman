@@ -44,6 +44,7 @@ import com.liman.app.data.model.JournalEntry
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.components.SectionHeader
+import com.liman.app.ui.components.moodIcon
 import com.liman.app.ui.components.bounceClick
 import com.liman.app.ui.components.screenPadding
 import com.liman.app.ui.copy.LocalCopy
@@ -205,7 +206,14 @@ private fun JournalCard(entry: JournalEntry, onClick: () -> Unit) {
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.weight(1f),
                     )
-                    entry.moodFace?.let { Text(it.emoji) }
+                    entry.moodFace?.let {
+                        Icon(
+                            moodIcon(it),
+                            contentDescription = it.label,
+                            tint = LocalLimanColors.current.moodColor(it.score),
+                            modifier = Modifier.size(22.dp),
+                        )
+                    }
                 }
                 if (entry.preview.isNotBlank()) {
                     Text(

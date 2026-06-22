@@ -210,7 +210,12 @@ fun MoodFaceBubble(
                 .bounceClick { onClick() },
             contentAlignment = Alignment.Center,
         ) {
-            Text(face.emoji, fontSize = (size * 0.46f).sp)
+            Icon(
+                moodIcon(face),
+                contentDescription = face.label,
+                tint = color,
+                modifier = Modifier.size((size * 0.56f).dp),
+            )
         }
         Text(
             face.label,

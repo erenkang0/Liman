@@ -15,6 +15,8 @@ data class UserProfile(
     val name: String = "",
     val birthDate: LocalDate? = null,
     val gender: Gender? = null,
+    /** Yerel profil fotoğrafı URI'si. */
+    val photoUri: String? = null,
 )
 
 enum class ThemeMode(val label: String) {

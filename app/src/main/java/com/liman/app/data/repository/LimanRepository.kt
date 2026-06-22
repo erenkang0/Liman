@@ -43,7 +43,7 @@ class LimanRepository(
 ) {
 
     /* ----------------------------- Ruh hali ----------------------------- */
-    private val _moods = MutableStateFlow(sampleMoods())
+    private val _moods = MutableStateFlow(emptyList<MoodEntry>())
     val moods: StateFlow<List<MoodEntry>> = _moods.asStateFlow()
 
     fun addMood(
@@ -67,7 +67,7 @@ class LimanRepository(
 
     /* ----------------------------- Günlük ------------------------------ */
     // İçeride şifreli gövde ile saklanır.
-    private val _storedJournals = MutableStateFlow(sampleJournals())
+    private val _storedJournals = MutableStateFlow(emptyList<JournalEntry>())
 
     /** UI'a çözülmüş (düz metin) olarak sunulan günlük akışı. */
     val journals: StateFlow<List<JournalEntry>> = _storedJournals
@@ -101,7 +101,7 @@ class LimanRepository(
     }
 
     /* ----------------------------- Bağlar ------------------------------ */
-    private val _contacts = MutableStateFlow(sampleContacts())
+    private val _contacts = MutableStateFlow(emptyList<Contact>())
     val contacts: StateFlow<List<Contact>> = _contacts.asStateFlow()
 
     fun contact(id: String): Contact? = _contacts.value.firstOrNull { it.id == id }
@@ -159,7 +159,7 @@ class LimanRepository(
     }
 
     /* --------------------------- Şükran defteri ------------------------- */
-    private val _gratitude = MutableStateFlow(sampleGratitude())
+    private val _gratitude = MutableStateFlow(emptyList<GratitudeEntry>())
     val gratitude: StateFlow<List<GratitudeEntry>> = _gratitude.asStateFlow()
 
     fun addGratitude(items: List<String>) {
@@ -169,7 +169,7 @@ class LimanRepository(
     }
 
     /* --------------------------- Zaman kapsülü -------------------------- */
-    private val _capsules = MutableStateFlow(sampleCapsules())
+    private val _capsules = MutableStateFlow(emptyList<TimeCapsule>())
     val capsules: StateFlow<List<TimeCapsule>> = _capsules.asStateFlow()
 
     fun addCapsule(title: String, body: String, openOn: LocalDate): String {
@@ -195,118 +195,4 @@ class LimanRepository(
         runCatching { crypto.decrypt(value) }.getOrDefault(value)
 
     private fun newId() = UUID.randomUUID().toString()
-
-    /* ------------------------------ Örnek veri -------------------------- */
-    private fun sampleMoods(): List<MoodEntry> {
-        val now = LocalDateTime.now()
-        val faces = listOf(3, 4, 2, 4, 5, 3, 4, 2, 3, 4, 5, 4, 3, 4)
-        return faces.mapIndexed { i, score ->
-            MoodEntry(
-                id = newId(),
-                face = MoodFace.fromScore(score),
-                intensity = MoodIntensity.entries[(i % 5)],
-                triggers = if (i % 3 == 0) listOf(MoodTrigger.WORK, MoodTrigger.SLEEP) else listOf(MoodTrigger.REST),
-                timestamp = now.minusDays(i.toLong()).withHour(20).withMinute(15),
-            )
-        }
-    }
-
-    private fun sampleJournals(): List<JournalEntry> {
-        val seeds = listOf(
-            Triple(
-                "Sabahın sessizliği",
-                "Bugün erken uyandım ve pencereden uzun süre dışarı baktım. Zihnim sakindi; uzun zamandır olmadığı kadar. Belki de küçük şeyleri fark etmeye başlamak yetiyor.",
-                MoodFace.GOOD,
-            ),
-            Triple(
-                "Zor bir gün",
-                "İş yoğundu ve kendimi yetersiz hissettim. Ama akşam yürüyüşe çıkınca biraz hafifledim. Yarın daha nazik olacağım kendime.",
-                MoodFace.LOW,
-            ),
-            Triple(
-                "Küçük bir zafer",
-                "Aylardır ertelediğim o konuşmayı yaptım. Kalbim hızlandı ama sonunda rahatladım. Cesaret, korkunun yokluğu değilmiş.",
-                MoodFace.GREAT,
-            ),
-        )
-        val now = LocalDateTime.now()
-        return seeds.mapIndexed { i, (title, body, mood) ->
-            JournalEntry(
-                id = newId(),
-                title = title,
-                body = crypto.encrypt(body),
-                // İlk örnekte ilk cümleyi kalın göstererek zengin metni örnekle.
-                spans = if (i == 0) listOf(StyleSpan(0, 24, bold = true)) else emptyList(),
-                font = JournalFont.SERIF,
-                moodFace = mood,
-                timestamp = now.minusDays((i * 2 + 1).toLong()).withHour(22),
-            )
-        }
-    }
-
-    private fun sampleContacts(): List<Contact> {
-        val today = LocalDate.now()
-        return listOf(
-            Contact(
-                id = newId(),
-                name = "Elif Demir",
-                relationship = RelationshipType.FRIEND,
-                weather = EmotionalWeather.SUNNY,
-                bio = "Üniversiteden en yakın arkadaşım. Her zaman güldürür.",
-                weatherNote = "Son görüşmemiz çok iyiydi, içim ısındı.",
-                birthday = today.plusDays(4),
-                lastContact = today.minusDays(2),
-                memories = listOf(
-                    Memory(newId(), "Sahil yürüyüşü", "Saatlerce konuştuk.", today.minusDays(20)),
-                    Memory(newId(), "Doğum günü sürprizi", "", today.minusMonths(6)),
-                ),
-            ),
-            Contact(
-                id = newId(),
-                name = "Mehmet Yılmaz",
-                relationship = RelationshipType.FAMILY,
-                weather = EmotionalWeather.WARM,
-                bio = "Abim. Sakin ve güven veren.",
-                birthday = today.plusDays(31),
-                lastContact = today.minusDays(9),
-            ),
-            Contact(
-                id = newId(),
-                name = "Zeynep Kaya",
-                relationship = RelationshipType.FRIEND,
-                weather = EmotionalWeather.CLOUDY,
-                bio = "Lise arkadaşım. Bir süredir konuşamadık.",
-                weatherNote = "Aramızda küçük bir mesafe var, yakında aramalıyım.",
-                lastContact = today.minusDays(38),
-            ),
-            Contact(
-                id = newId(),
-                name = "Can Aydın",
-                relationship = RelationshipType.COLLEAGUE,
-                weather = EmotionalWeather.CALM,
-                bio = "İş arkadaşım, birlikte iyi çalışıyoruz.",
-                birthday = today.plusDays(12),
-                lastContact = today.minusDays(3),
-            ),
-        )
-    }
-
-    private fun sampleGratitude(): List<GratitudeEntry> = listOf(
-        GratitudeEntry(
-            newId(),
-            listOf("Sabah kahvesinin kokusu", "Bir arkadaşın mesajı", "Sağlıklı bir beden"),
-            LocalDateTime.now().minusDays(1),
-        ),
-    )
-
-    private fun sampleCapsules(): List<TimeCapsule> = listOf(
-        TimeCapsule(
-            id = newId(),
-            title = "Gelecekteki bana",
-            body = "Umarım bu mektubu açtığında daha huzurlusundur.",
-            createdAt = LocalDateTime.now().minusMonths(2),
-            openOn = LocalDate.now().plusMonths(4),
-            sealed = true,
-        ),
-    )
 }
