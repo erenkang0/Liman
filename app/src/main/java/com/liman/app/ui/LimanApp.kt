@@ -5,8 +5,12 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -44,19 +48,27 @@ fun LimanApp(viewModel: LimanViewModel) {
         settings.lockLocation == LockLocation.APP_OPEN &&
         !unlocked
 
-    when {
-        !settings.onboarded -> OnboardingScreen(
-            onComplete = viewModel::completeOnboarding,
-            onSkip = viewModel::skipOnboarding,
-        )
+    // Kök Surface, doğru içerik rengini (onBackground) sağlar; böylece Scaffold
+    // dışındaki ekranlarda (onboarding / açılış kilidi) yazılar koyu temada da okunur.
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+    ) {
+        when {
+            !settings.onboarded -> OnboardingScreen(
+                onComplete = viewModel::completeOnboarding,
+                onSkip = viewModel::skipOnboarding,
+            )
 
-        appOpenLock -> LockScreen(
-            settings = settings,
-            reason = LockReason.APP_OPEN,
-            onUnlock = viewModel::unlock,
-        )
+            appOpenLock -> LockScreen(
+                settings = settings,
+                reason = LockReason.APP_OPEN,
+                onUnlock = viewModel::unlock,
+            )
 
-        else -> LimanNavHost(viewModel)
+            else -> LimanNavHost(viewModel)
+        }
     }
 }
 
