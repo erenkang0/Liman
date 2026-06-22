@@ -40,15 +40,12 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.liman.app.data.model.EmotionalWeather
 import com.liman.app.data.model.MoodFace
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.Avatar
 import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.components.SectionHeader
 import com.liman.app.ui.components.moodIcon
-import com.liman.app.ui.components.weatherColor
-import com.liman.app.ui.components.weatherIcon
 import com.liman.app.ui.theme.LocalLimanColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -181,20 +178,20 @@ fun InsightScreen(
             }
         }
 
-        // Bağ sıcaklığı
-        SectionHeader("Bağ sıcaklığı", subtitle = "İlişkilerinin duygusal havası")
+        // Bağ yakınlığı
+        SectionHeader("Bağ yakınlığı", subtitle = "Kişilerle ne kadar yakınsın")
         LimanCard(Modifier.fillMaxWidth()) {
             Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                 if (contacts.isEmpty()) {
-                    Text("Henüz bağ yok.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
+                    Text("Henüz kişi yok.", color = MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.bodyMedium)
                 } else {
-                    contacts.take(5).forEach { contact ->
+                    contacts.sortedByDescending { it.closeness }.take(5).forEach { contact ->
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Avatar(contact, size = 36)
                             Spacer(Modifier.width(12.dp))
                             Column(Modifier.weight(1f)) {
                                 Text(contact.name, style = MaterialTheme.typography.titleSmall)
-                                val warmth = warmthScore(contact.weather)
+                                val warmth = (contact.closeness.coerceIn(1, 5)) / 5f
                                 Box(
                                     Modifier
                                         .fillMaxWidth()
@@ -207,16 +204,15 @@ fun InsightScreen(
                                             .fillMaxHeight()
                                             .fillMaxWidth(warmth)
                                             .clip(RoundedCornerShape(5.dp))
-                                            .background(weatherColor(contact.weather)),
+                                            .background(MaterialTheme.colorScheme.primary),
                                     )
                                 }
                             }
                             Spacer(Modifier.width(10.dp))
-                            Icon(
-                                weatherIcon(contact.weather),
-                                contentDescription = contact.weather.label,
-                                tint = weatherColor(contact.weather),
-                                modifier = Modifier.size(20.dp),
+                            Text(
+                                "${contact.closeness}/5",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                     }
@@ -291,10 +287,3 @@ private fun MoodDistribution(distribution: Map<MoodFace, Int>, modifier: Modifie
     }
 }
 
-private fun warmthScore(weather: EmotionalWeather): Float = when (weather) {
-    EmotionalWeather.SUNNY -> 1f
-    EmotionalWeather.WARM -> 0.8f
-    EmotionalWeather.CALM -> 0.6f
-    EmotionalWeather.CLOUDY -> 0.4f
-    EmotionalWeather.STORMY -> 0.2f
-}

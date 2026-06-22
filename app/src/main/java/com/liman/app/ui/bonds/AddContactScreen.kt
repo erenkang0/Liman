@@ -1,19 +1,32 @@
 package com.liman.app.ui.bonds
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -28,39 +41,46 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.liman.app.data.model.EmotionalWeather
 import com.liman.app.data.model.RelationshipType
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
-import com.liman.app.ui.components.WeatherDot
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 
-@OptIn(ExperimentalMaterial3Api::class)
+private val accentChoices = listOf(
+    Color(0xFFC8323C), Color(0xFFD98C5A), Color(0xFFC8A36A),
+    Color(0xFF4E8D6E), Color(0xFF0E7C99), Color(0xFF6A4FC4), Color(0xFFC24468),
+)
+
 @Composable
 fun AddContactScreen(
     viewModel: LimanViewModel,
     onBack: () -> Unit,
-    editContactId: String? = null,
+    onSaved: (String) -> Unit,
 ) {
-    val existing = remember(editContactId) { editContactId?.let { viewModel.repository.contact(it) } }
-    val isEdit = existing != null
-
-    var name by remember { mutableStateOf(existing?.name ?: "") }
-    var bio by remember { mutableStateOf(existing?.bio ?: "") }
-    var relationship by remember { mutableStateOf(existing?.relationship ?: RelationshipType.FRIEND) }
-    var weather by remember { mutableStateOf(existing?.weather ?: EmotionalWeather.CALM) }
-    var birthday by remember { mutableStateOf(existing?.birthday) }
+    var name by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf("") }
+    var relationship by remember { mutableStateOf(RelationshipType.FRIEND) }
+    var closeness by remember { mutableStateOf(3) }
+    var accent by remember { mutableStateOf<Color?>(null) }
+    var birthday by remember { mutableStateOf<LocalDate?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
+    val tags = remember { mutableListOf<String>().toMutableStateList() }
+    var tagDraft by remember { mutableStateOf("") }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(if (isEdit) "Kişiyi düzenle" else "Kişi ekle") },
+                title = { Text("Kişi ekle") },
                 navigationIcon = { BackButton(onBack) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -85,9 +105,10 @@ fun AddContactScreen(
             )
 
             OutlinedTextField(
-                value = bio,
-                onValueChange = { bio = it },
-                label = { Text("Kısa not / bio (opsiyonel)") },
+                value = title,
+                onValueChange = { title = it },
+                label = { Text("Başlık (örn. \"en iyi arkadaşım\")") },
+                singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -106,16 +127,85 @@ fun AddContactScreen(
             }
 
             Column {
-                Text("Duygusal hava", style = MaterialTheme.typography.titleSmall)
+                Text("Yakınlık / önem", style = MaterialTheme.typography.titleSmall)
                 Spacer(Modifier.height(8.dp))
-                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    EmotionalWeather.entries.forEach { w ->
-                        FilterChip(
-                            selected = weather == w,
-                            onClick = { weather = w },
-                            label = { Text(w.label) },
-                            leadingIcon = { WeatherDot(w, size = 12) },
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    (1..5).forEach { level ->
+                        val on = level <= closeness
+                        Box(
+                            Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(
+                                    if (on) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.surfaceContainerHighest
+                                )
+                                .clickable { closeness = level },
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Text(
+                                "$level",
+                                color = if (on) MaterialTheme.colorScheme.onPrimary
+                                else MaterialTheme.colorScheme.onSurfaceVariant,
+                                style = MaterialTheme.typography.labelMedium,
+                            )
+                        }
+                    }
+                }
+            }
+
+            Column {
+                Text("Renk", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    accentChoices.forEach { c ->
+                        val selected = accent == c
+                        Box(
+                            Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(c)
+                                .then(
+                                    if (selected) Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                    else Modifier
+                                )
+                                .clickable { accent = if (selected) null else c },
                         )
+                    }
+                }
+            }
+
+            Column {
+                Text("Etiketler", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(8.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    OutlinedTextField(
+                        value = tagDraft,
+                        onValueChange = { tagDraft = it },
+                        label = { Text("örn. huzur, sıkıntı") },
+                        singleLine = true,
+                        modifier = Modifier.weight(1f),
+                    )
+                    Spacer(Modifier.size(8.dp))
+                    IconButton(onClick = {
+                        val t = tagDraft.trim()
+                        if (t.isNotEmpty() && !tags.contains(t)) tags.add(t)
+                        tagDraft = ""
+                    }) {
+                        Icon(Icons.Rounded.Add, contentDescription = "Etiket ekle", tint = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                if (tags.isNotEmpty()) {
+                    Spacer(Modifier.height(8.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        tags.forEach { tag ->
+                            InputChip(
+                                selected = false,
+                                onClick = { tags.remove(tag) },
+                                label = { Text(tag) },
+                                trailingIcon = { Icon(Icons.Rounded.Close, contentDescription = "Kaldır", modifier = Modifier.size(16.dp)) },
+                            )
+                        }
                     }
                 }
             }
@@ -127,26 +217,24 @@ fun AddContactScreen(
             Button(
                 onClick = {
                     if (name.isNotBlank()) {
-                        if (existing != null) {
-                            viewModel.repository.upsertContact(
-                                existing.copy(
-                                    name = name.trim(),
-                                    bio = bio.trim(),
-                                    relationship = relationship,
-                                    weather = weather,
-                                    birthday = birthday,
-                                )
-                            )
-                        } else {
-                            viewModel.repository.addContact(name.trim(), relationship, birthday, weather)
-                        }
-                        onBack()
+                        val id = viewModel.repository.addContact(
+                            name = name.trim(),
+                            title = title.trim(),
+                            relationship = relationship,
+                            birthday = birthday,
+                            tags = tags.toList(),
+                            closeness = closeness,
+                            accentColorArgb = accent?.toArgb(),
+                        )
+                        onSaved(id)
                     }
                 },
                 enabled = name.isNotBlank(),
                 modifier = Modifier.fillMaxWidth(),
             ) {
-                Text("Kaydet")
+                Icon(Icons.Rounded.Check, contentDescription = null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.size(8.dp))
+                Text("Kaydet ve defterini aç")
             }
             Spacer(Modifier.height(24.dp))
         }

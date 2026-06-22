@@ -44,7 +44,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.liman.app.data.model.Contact
-import com.liman.app.data.model.EmotionalWeather
 import com.liman.app.data.model.MoodFace
 import com.liman.app.ui.theme.LocalLimanColors
 import kotlinx.coroutines.delay
@@ -119,7 +118,7 @@ fun Avatar(
     size: Int = 48,
     modifier: Modifier = Modifier,
 ) {
-    val color = avatarColor(contact.avatarSeed)
+    val color = contact.accentColorArgb?.let { Color(it) } ?: avatarColor(contact.avatarSeed)
     Box(
         modifier = modifier
             .size(size.dp)
@@ -139,27 +138,6 @@ fun Avatar(
 fun avatarColor(seed: Int): Color {
     val hue = (abs(seed) % 360).toFloat()
     return Color.hsl(hue, 0.42f, 0.52f)
-}
-
-/** Kişinin "duygusal hava" rengini veren nokta. */
-@Composable
-fun weatherColor(weather: EmotionalWeather): Color = when (weather) {
-    EmotionalWeather.SUNNY -> LocalLimanColors.current.moodGreat
-    EmotionalWeather.WARM -> LocalLimanColors.current.moodGood
-    EmotionalWeather.CALM -> LocalLimanColors.current.bondAccent
-    EmotionalWeather.CLOUDY -> LocalLimanColors.current.moodLow
-    EmotionalWeather.STORMY -> LocalLimanColors.current.moodVeryLow
-}
-
-@Composable
-fun WeatherDot(weather: EmotionalWeather, size: Int = 12, modifier: Modifier = Modifier) {
-    Box(
-        modifier
-            .size(size.dp)
-            .clip(CircleShape)
-            .border(2.dp, MaterialTheme.colorScheme.surface, CircleShape)
-            .background(weatherColor(weather)),
-    )
 }
 
 /** Küçük kilit rozeti. */

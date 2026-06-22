@@ -1,5 +1,10 @@
+@file:UseSerializers(LocalDateTimeSerializer::class)
+
 package com.liman.app.data.model
 
+import com.liman.app.data.local.LocalDateTimeSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import java.time.LocalDate
 import java.time.LocalDateTime
 
@@ -8,6 +13,7 @@ import java.time.LocalDateTime
  * Görsel (ikon) eşlemesi UI katmanındadır (bkz. ui/components/MoodVisuals).
  * [score] 1 (çok düşük) .. 5 (çok iyi).
  */
+@Serializable
 enum class MoodFace(val score: Int, val label: String) {
     VERY_LOW(1, "Zor"),
     LOW(2, "İniş"),
@@ -21,6 +27,7 @@ enum class MoodFace(val score: Int, val label: String) {
 }
 
 /** Duygu yoğunluğu ölçeği (etiketli). */
+@Serializable
 enum class MoodIntensity(val label: String, val value: Int) {
     VERY_MILD("Çok hafif", 1),
     MILD("Hafif", 2),
@@ -30,6 +37,7 @@ enum class MoodIntensity(val label: String, val value: Int) {
 }
 
 /** Çoklu seçilebilen tetikleyici etiketleri. */
+@Serializable
 enum class MoodTrigger(val label: String) {
     WORK("İş"),
     FAMILY("Aile"),
@@ -45,6 +53,7 @@ enum class MoodTrigger(val label: String) {
     ACHIEVEMENT("Başarı"),
 }
 
+@Serializable
 data class MoodEntry(
     val id: String,
     val face: MoodFace,

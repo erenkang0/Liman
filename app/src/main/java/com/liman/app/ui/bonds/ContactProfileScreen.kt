@@ -7,6 +7,7 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,21 +25,25 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.AddPhotoAlternate
 import androidx.compose.material.icons.rounded.Cake
 import androidx.compose.material.icons.rounded.Chat
 import androidx.compose.material.icons.rounded.CheckCircle
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Done
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.Link
-import androidx.compose.material.icons.rounded.NotificationsActive
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -53,18 +58,21 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.liman.app.data.model.EmotionalWeather
-import com.liman.app.data.model.Memory
+import com.liman.app.data.model.MoodFace
+import com.liman.app.data.model.NotebookEntry
 import com.liman.app.data.model.RelationshipType
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.AnimatedEntrance
@@ -72,9 +80,10 @@ import com.liman.app.ui.components.Avatar
 import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.FullscreenPhotoViewer
 import com.liman.app.ui.components.LimanCard
+import com.liman.app.ui.components.MoodFaceRow
+import com.liman.app.ui.components.QuillIcon
 import com.liman.app.ui.components.SectionHeader
-import com.liman.app.ui.components.WeatherDot
-import com.liman.app.ui.components.weatherColor
+import com.liman.app.ui.components.moodIcon
 import com.liman.app.ui.theme.LocalLimanColors
 import java.time.Instant
 import java.time.LocalDate
@@ -82,30 +91,39 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
+private val accentChoices = listOf(
+    Color(0xFFC8323C), Color(0xFFD98C5A), Color(0xFFC8A36A),
+    Color(0xFF4E8D6E), Color(0xFF0E7C99), Color(0xFF6A4FC4), Color(0xFFC24468),
+)
+
 @Composable
 fun ContactProfileScreen(
     viewModel: LimanViewModel,
     contactId: String,
     onBack: () -> Unit,
-    onOpenMemory: (String) -> Unit,
+    onOpenNote: (String) -> Unit,
 ) {
     val contacts by viewModel.repository.contacts.collectAsStateWithLifecycle()
     val contact = contacts.firstOrNull { it.id == contactId }
     val context = LocalContext.current
     val today = LocalDate.now()
 
-    var showMemoryDialog by remember { mutableStateOf(false) }
+    var showNoteDialog by remember { mutableStateOf(false) }
     var showAlbumDialog by remember { mutableStateOf(false) }
     var notice by remember { mutableStateOf<String?>(null) }
-    var noteDraft by remember(contactId, contact?.weatherNote) { mutableStateOf(contact?.weatherNote ?: "") }
     var viewerIndex by remember { mutableStateOf<Int?>(null) }
 
     // Satır içi düzenleme (kişi ekranının içinde)
     var editing by remember { mutableStateOf(false) }
     var nameDraft by remember(contactId) { mutableStateOf("") }
+    var titleDraft by remember(contactId) { mutableStateOf("") }
     var bioDraft by remember(contactId) { mutableStateOf("") }
     var relDraft by remember(contactId) { mutableStateOf(RelationshipType.FRIEND) }
+    var closenessDraft by remember(contactId) { mutableStateOf(3) }
+    var accentDraft by remember(contactId) { mutableStateOf<Color?>(null) }
     var birthdayDraft by remember(contactId) { mutableStateOf<LocalDate?>(null) }
+    val tagDrafts = remember(contactId) { mutableListOf<String>().toMutableStateList() }
+    var tagInput by remember(contactId) { mutableStateOf("") }
     var showEditDate by remember { mutableStateOf(false) }
 
     val albumPicker = rememberLauncherForActivityResult(
@@ -130,17 +148,25 @@ fun ContactProfileScreen(
                                 viewModel.repository.upsertContact(
                                     contact.copy(
                                         name = nameDraft.trim().ifBlank { contact.name },
+                                        title = titleDraft.trim(),
                                         bio = bioDraft.trim(),
                                         relationship = relDraft,
+                                        closeness = closenessDraft,
+                                        accentColorArgb = accentDraft?.toArgb(),
                                         birthday = birthdayDraft,
+                                        tags = tagDrafts.toList(),
                                     )
                                 )
                                 editing = false
                             } else {
                                 nameDraft = contact.name
+                                titleDraft = contact.title
                                 bioDraft = contact.bio
                                 relDraft = contact.relationship
+                                closenessDraft = contact.closeness
+                                accentDraft = contact.accentColorArgb?.let { Color(it) }
                                 birthdayDraft = contact.birthday
+                                tagDrafts.clear(); tagDrafts.addAll(contact.tags)
                                 editing = true
                             }
                         }) {
@@ -164,28 +190,40 @@ fun ContactProfileScreen(
             return@Scaffold
         }
 
+        val accent = contact.accentColorArgb?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
+
         Column(
             Modifier
                 .padding(padding)
                 .fillMaxWidth()
                 .verticalScroll(rememberScrollState())
-                .padding(bottom = 32.dp),
+                .padding(bottom = 40.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            // Kapak + avatar (animasyonla açılır)
+            // Kapak + avatar
             AnimatedEntrance {
                 Box(Modifier.fillMaxWidth()) {
-                    Box(
-                        Modifier
-                            .fillMaxWidth()
-                            .height(120.dp)
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(weatherColor(contact.weather).copy(alpha = 0.55f), MaterialTheme.colorScheme.primaryContainer),
-                                )
-                            ),
-                    )
-                    Box(Modifier.padding(start = 20.dp, top = 76.dp)) {
+                    val coverPhoto = contact.coverPhoto
+                    if (coverPhoto != null) {
+                        AsyncImage(
+                            model = coverPhoto,
+                            contentDescription = "Kapak",
+                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
+                            modifier = Modifier.fillMaxWidth().height(140.dp),
+                        )
+                    } else {
+                        Box(
+                            Modifier
+                                .fillMaxWidth()
+                                .height(130.dp)
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(accent.copy(alpha = 0.65f), MaterialTheme.colorScheme.surfaceContainerHigh)
+                                    )
+                                ),
+                        )
+                    }
+                    Box(Modifier.padding(start = 20.dp, top = 86.dp)) {
                         Box(
                             Modifier.size(92.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surface).padding(4.dp),
                         ) {
@@ -199,51 +237,56 @@ fun ContactProfileScreen(
                 AnimatedEntrance(delayMillis = 60) {
                     Crossfade(targetState = editing, label = "contactHeader") { edit ->
                         if (edit) {
-                            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                OutlinedTextField(
-                                    value = nameDraft,
-                                    onValueChange = { nameDraft = it },
-                                    label = { Text("İsim") },
-                                    singleLine = true,
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                                OutlinedTextField(
-                                    value = bioDraft,
-                                    onValueChange = { bioDraft = it },
-                                    label = { Text("Kısa not / bio") },
-                                    modifier = Modifier.fillMaxWidth(),
-                                )
-                                Text("İlişki", style = MaterialTheme.typography.titleSmall)
-                                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                    RelationshipType.entries.forEach { type ->
-                                        FilterChip(
-                                            selected = relDraft == type,
-                                            onClick = { relDraft = type },
-                                            label = { Text(type.label) },
-                                        )
-                                    }
-                                }
-                                OutlinedButton(onClick = { showEditDate = true }, modifier = Modifier.fillMaxWidth()) {
-                                    Text(birthdayDraft?.let { "Doğum günü: ${it.format(dayMonthYear)}" } ?: "Doğum günü seç")
-                                }
-                                Text(
-                                    "Yukarıdaki ✓ ile kaydet.",
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                )
-                            }
+                            EditFields(
+                                name = nameDraft, onName = { nameDraft = it },
+                                title = titleDraft, onTitle = { titleDraft = it },
+                                bio = bioDraft, onBio = { bioDraft = it },
+                                rel = relDraft, onRel = { relDraft = it },
+                                closeness = closenessDraft, onCloseness = { closenessDraft = it },
+                                accent = accentDraft, onAccent = { accentDraft = it },
+                                tags = tagDrafts, tagInput = tagInput, onTagInput = { tagInput = it },
+                                onAddTag = {
+                                    val t = tagInput.trim()
+                                    if (t.isNotEmpty() && !tagDrafts.contains(t)) tagDrafts.add(t)
+                                    tagInput = ""
+                                },
+                                onRemoveTag = { tagDrafts.remove(it) },
+                                birthday = birthdayDraft, onPickDate = { showEditDate = true },
+                            )
                         } else {
                             Column {
                                 Text(contact.name, style = MaterialTheme.typography.headlineMedium)
+                                if (contact.title.isNotBlank()) {
+                                    Text(
+                                        contact.title,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.primary,
+                                    )
+                                }
                                 Spacer(Modifier.height(4.dp))
                                 Row(verticalAlignment = Alignment.CenterVertically) {
-                                    WeatherDot(contact.weather, size = 12)
-                                    Spacer(Modifier.width(6.dp))
                                     Text(
-                                        "${contact.weather.label} · ${contact.relationship.label}",
+                                        contact.relationship.label,
                                         style = MaterialTheme.typography.bodyMedium,
-                                        color = MaterialTheme.colorScheme.onSurface,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                                     )
+                                    Spacer(Modifier.width(10.dp))
+                                    ClosenessDots(contact.closeness)
+                                }
+                                if (contact.tags.isNotEmpty()) {
+                                    Spacer(Modifier.height(10.dp))
+                                    FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                        contact.tags.forEach { tag ->
+                                            AssistChip(
+                                                onClick = {},
+                                                label = { Text(tag, style = MaterialTheme.typography.labelSmall) },
+                                                colors = AssistChipDefaults.assistChipColors(
+                                                    containerColor = LocalLimanColors.current.bondContainer,
+                                                    labelColor = LocalLimanColors.current.onBondContainer,
+                                                ),
+                                            )
+                                        }
+                                    }
                                 }
                                 if (contact.bio.isNotBlank()) {
                                     Spacer(Modifier.height(8.dp))
@@ -263,9 +306,6 @@ fun ContactProfileScreen(
                         ActionButton("Mesaj", Icons.Rounded.Chat, Modifier.weight(1f)) {
                             runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("sms:"))) }
                                 .onFailure { notice = "Mesaj uygulaması açılamadı" }
-                        }
-                        ActionButton("Hatırlat", Icons.Rounded.NotificationsActive, Modifier.weight(1f)) {
-                            notice = "Hatırlatıcı kuruldu (yakında bildirimle)"
                         }
                     }
                 }
@@ -295,41 +335,13 @@ fun ContactProfileScreen(
                     }
                 }
 
-                AnimatedEntrance(delayMillis = 210) {
-                    LimanCard(Modifier.fillMaxWidth()) {
-                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                            Text("Duygusal hava", style = MaterialTheme.typography.titleMedium)
-                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                                EmotionalWeather.entries.forEach { w ->
-                                    FilterChip(
-                                        selected = contact.weather == w,
-                                        onClick = { viewModel.repository.upsertContact(contact.copy(weather = w)) },
-                                        label = { Text(w.label) },
-                                        leadingIcon = { WeatherDot(w, size = 12) },
-                                    )
-                                }
-                            }
-                            OutlinedTextField(
-                                value = noteDraft,
-                                onValueChange = { noteDraft = it },
-                                label = { Text("Bu ilişki sana ne hissettiriyor?") },
-                                modifier = Modifier.fillMaxWidth(),
-                            )
-                            TextButton(onClick = {
-                                viewModel.repository.upsertContact(contact.copy(weatherNote = noteDraft.trim()))
-                                notice = "Not kaydedildi"
-                            }) { Text("Notu kaydet") }
-                        }
-                    }
-                }
-
                 // İletişim ritmi (keep-in-touch)
-                AnimatedEntrance(delayMillis = 235) {
+                AnimatedEntrance(delayMillis = 210) {
                     LimanCard(Modifier.fillMaxWidth()) {
                         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             Text("İletişim ritmi", style = MaterialTheme.typography.titleMedium)
                             Text(
-                                "Bu bağı sıcak tutmak için ne sıklıkta haberleşmek istersin?",
+                                "Bu kişiyle ne sıklıkta haberleşmek istersin?",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
@@ -358,8 +370,37 @@ fun ContactProfileScreen(
                     }
                 }
 
+                // Kişiye özel defter (notlar)
+                AnimatedEntrance(delayMillis = 250) {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        SectionHeader(
+                            "Defter",
+                            subtitle = "${contact.entries.size} not",
+                            trailing = { TextButton(onClick = { showNoteDialog = true }) { Text("Not ekle") } },
+                        )
+                        if (contact.entries.isEmpty()) {
+                            LimanCard(Modifier.fillMaxWidth()) {
+                                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                                    QuillIcon(modifier = Modifier.size(34.dp), tint = MaterialTheme.colorScheme.primary)
+                                    Spacer(Modifier.width(12.dp))
+                                    Text(
+                                        "${contact.name} hakkında düşündüklerini buraya yaz. Yalnızca sana ait.",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        modifier = Modifier.weight(1f),
+                                    )
+                                }
+                            }
+                        } else {
+                            contact.entries.forEach { entry ->
+                                NoteRow(entry) { onOpenNote(entry.id) }
+                            }
+                        }
+                    }
+                }
+
                 // Fotoğraf albümü
-                AnimatedEntrance(delayMillis = 260) {
+                AnimatedEntrance(delayMillis = 300) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         SectionHeader("Fotoğraf albümü", subtitle = "${contact.photos.size}/5")
                         if (contact.photos.isNotEmpty()) {
@@ -401,37 +442,16 @@ fun ContactProfileScreen(
                         }
                     }
                 }
-
-                // Anılar zaman tüneli
-                AnimatedEntrance(delayMillis = 310) {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        SectionHeader(
-                            "Anılar",
-                            trailing = { TextButton(onClick = { showMemoryDialog = true }) { Text("Anı ekle") } },
-                        )
-                        if (contact.memories.isEmpty()) {
-                            Text(
-                                "Birlikte biriktirdiğiniz anlar burada yaşar.",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            )
-                        } else {
-                            contact.memories.forEach { memory ->
-                                MemoryRow(memory) { onOpenMemory(memory.id) }
-                            }
-                        }
-                    }
-                }
             }
         }
     }
 
-    if (showMemoryDialog && contact != null) {
-        AddMemoryDialog(
-            onDismiss = { showMemoryDialog = false },
-            onAdd = { title, note ->
-                viewModel.repository.addMemory(contactId, title, note)
-                showMemoryDialog = false
+    if (showNoteDialog && contact != null) {
+        AddNoteDialog(
+            onDismiss = { showNoteDialog = false },
+            onAdd = { title, text, feeling ->
+                viewModel.repository.addEntry(contactId, title = title, text = text, feeling = feeling)
+                showNoteDialog = false
             },
         )
     }
@@ -478,6 +498,85 @@ fun ContactProfileScreen(
 }
 
 @Composable
+private fun EditFields(
+    name: String, onName: (String) -> Unit,
+    title: String, onTitle: (String) -> Unit,
+    bio: String, onBio: (String) -> Unit,
+    rel: RelationshipType, onRel: (RelationshipType) -> Unit,
+    closeness: Int, onCloseness: (Int) -> Unit,
+    accent: Color?, onAccent: (Color?) -> Unit,
+    tags: List<String>, tagInput: String, onTagInput: (String) -> Unit,
+    onAddTag: () -> Unit, onRemoveTag: (String) -> Unit,
+    birthday: LocalDate?, onPickDate: () -> Unit,
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        OutlinedTextField(name, onName, label = { Text("İsim") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(title, onTitle, label = { Text("Başlık (örn. \"en iyi arkadaşım\")") }, singleLine = true, modifier = Modifier.fillMaxWidth())
+        OutlinedTextField(bio, onBio, label = { Text("Kısa not / bio") }, modifier = Modifier.fillMaxWidth())
+        Text("İlişki", style = MaterialTheme.typography.titleSmall)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            RelationshipType.entries.forEach { type ->
+                FilterChip(selected = rel == type, onClick = { onRel(type) }, label = { Text(type.label) })
+            }
+        }
+        Text("Yakınlık / önem", style = MaterialTheme.typography.titleSmall)
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            (1..5).forEach { level ->
+                val on = level <= closeness
+                Box(
+                    Modifier.size(32.dp).clip(CircleShape)
+                        .background(if (on) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest)
+                        .clickable { onCloseness(level) },
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Text("$level", color = if (on) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSurfaceVariant, style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        }
+        Text("Renk", style = MaterialTheme.typography.titleSmall)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            accentChoices.forEach { c ->
+                val selected = accent == c
+                Box(
+                    Modifier.size(32.dp).clip(CircleShape).background(c)
+                        .then(if (selected) Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape) else Modifier)
+                        .clickable { onAccent(if (selected) null else c) },
+                )
+            }
+        }
+        Text("Etiketler", style = MaterialTheme.typography.titleSmall)
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            OutlinedTextField(tagInput, onTagInput, label = { Text("örn. huzur, sıkıntı") }, singleLine = true, modifier = Modifier.weight(1f))
+            IconButton(onClick = onAddTag) { Icon(Icons.Rounded.Add, contentDescription = "Ekle", tint = MaterialTheme.colorScheme.primary) }
+        }
+        if (tags.isNotEmpty()) {
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                tags.forEach { tag ->
+                    InputChip(selected = false, onClick = { onRemoveTag(tag) }, label = { Text(tag) },
+                        trailingIcon = { Icon(Icons.Rounded.Close, contentDescription = "Kaldır", modifier = Modifier.size(16.dp)) })
+                }
+            }
+        }
+        OutlinedButton(onClick = onPickDate, modifier = Modifier.fillMaxWidth()) {
+            Text(birthday?.let { "Doğum günü: ${it.format(dayMonthYear)}" } ?: "Doğum günü seç")
+        }
+        Text("Yukarıdaki ✓ ile kaydet.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
+
+@Composable
+private fun ClosenessDots(level: Int) {
+    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
+        repeat(5) { i ->
+            Box(
+                Modifier.size(7.dp).clip(CircleShape)
+                    .background(if (i < level) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest),
+            )
+        }
+    }
+}
+
+@Composable
 private fun ActionButton(label: String, icon: androidx.compose.ui.graphics.vector.ImageVector, modifier: Modifier, onClick: () -> Unit) {
     Button(
         onClick = onClick,
@@ -508,10 +607,10 @@ private fun InfoCard(label: String, value: String, sub: String, modifier: Modifi
 }
 
 @Composable
-private fun MemoryRow(memory: Memory, onClick: () -> Unit) {
+private fun NoteRow(entry: NotebookEntry, onClick: () -> Unit) {
     LimanCard(Modifier.fillMaxWidth(), onClick = onClick) {
-        Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            memory.coverPhoto?.let { cover ->
+        Row(Modifier.padding(14.dp), verticalAlignment = Alignment.CenterVertically) {
+            entry.coverPhoto?.let { cover ->
                 AsyncImage(
                     model = cover,
                     contentDescription = null,
@@ -521,15 +620,29 @@ private fun MemoryRow(memory: Memory, onClick: () -> Unit) {
                 Spacer(Modifier.width(12.dp))
             }
             Column(Modifier.weight(1f)) {
-                Text(memory.title, style = MaterialTheme.typography.titleSmall)
-                Text(memory.date.format(dayMonthYear), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                if (memory.note.isNotBlank()) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Text(
-                        memory.note,
+                        entry.title.ifBlank { "Not" },
+                        style = MaterialTheme.typography.titleSmall,
+                        modifier = Modifier.weight(1f),
+                    )
+                    entry.feeling?.let {
+                        Icon(
+                            moodIcon(it),
+                            contentDescription = it.label,
+                            tint = LocalLimanColors.current.moodColor(it.score),
+                            modifier = Modifier.size(18.dp),
+                        )
+                    }
+                }
+                Text(entry.date.format(dayMonthYear), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                if (entry.preview.isNotBlank()) {
+                    Text(
+                        entry.preview,
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
                     )
                 }
             }
@@ -538,22 +651,30 @@ private fun MemoryRow(memory: Memory, onClick: () -> Unit) {
 }
 
 @Composable
-private fun AddMemoryDialog(onDismiss: () -> Unit, onAdd: (String, String) -> Unit) {
+private fun AddNoteDialog(onDismiss: () -> Unit, onAdd: (String, String, MoodFace?) -> Unit) {
     var title by remember { mutableStateOf("") }
-    var note by remember { mutableStateOf("") }
+    var text by remember { mutableStateOf("") }
+    var feeling by remember { mutableStateOf<MoodFace?>(null) }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Anı ekle") },
+        title = { Text("Not ekle") },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Başlık") }, singleLine = true)
-                OutlinedTextField(value = note, onValueChange = { note = it }, label = { Text("Not (opsiyonel)") })
+                OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("Başlık (opsiyonel)") }, singleLine = true)
+                OutlinedTextField(value = text, onValueChange = { text = it }, label = { Text("Bu kişi hakkında ne düşünüyorsun?") })
+                Text("Şu an nasıl hissediyorsun? (opsiyonel)", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                MoodFaceRow(
+                    selected = feeling,
+                    onSelect = { f -> feeling = if (feeling == f) null else f },
+                    bubbleSize = 44,
+                )
             }
         },
         confirmButton = {
-            TextButton(onClick = { if (title.isNotBlank()) onAdd(title.trim(), note.trim()) }, enabled = title.isNotBlank()) {
-                Text("Ekle")
-            }
+            TextButton(
+                onClick = { if (text.isNotBlank() || title.isNotBlank()) onAdd(title.trim(), text.trim(), feeling) },
+                enabled = text.isNotBlank() || title.isNotBlank(),
+            ) { Text("Ekle") }
         },
         dismissButton = { TextButton(onClick = onDismiss) { Text("Vazgeç") } },
     )
@@ -577,23 +698,13 @@ private fun AlbumLinkDialog(
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
-                OutlinedTextField(
-                    value = url,
-                    onValueChange = { url = it },
-                    label = { Text("https://…") },
-                    singleLine = true,
-                )
+                OutlinedTextField(value = url, onValueChange = { url = it }, label = { Text("https://…") }, singleLine = true)
             }
         },
-        confirmButton = {
-            TextButton(onClick = { onSave(url.trim()) }) { Text("Kaydet") }
-        },
+        confirmButton = { TextButton(onClick = { onSave(url.trim()) }) { Text("Kaydet") } },
         dismissButton = {
-            if (initial.isNotBlank()) {
-                TextButton(onClick = { onOpen(initial) }) { Text("Aç") }
-            } else {
-                TextButton(onClick = onDismiss) { Text("Vazgeç") }
-            }
+            if (initial.isNotBlank()) TextButton(onClick = { onOpen(initial) }) { Text("Aç") }
+            else TextButton(onClick = onDismiss) { Text("Vazgeç") }
         },
     )
 }

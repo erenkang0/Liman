@@ -52,8 +52,12 @@ fun SearchScreen(
     val journalHits = if (q.isBlank()) emptyList() else journals.filter {
         it.title.lowercase().contains(q) || it.body.lowercase().contains(q)
     }
-    val contactHits = if (q.isBlank()) emptyList() else contacts.filter {
-        it.name.lowercase().contains(q) || it.bio.lowercase().contains(q)
+    val contactHits = if (q.isBlank()) emptyList() else contacts.filter { c ->
+        c.name.lowercase().contains(q) ||
+            c.title.lowercase().contains(q) ||
+            c.bio.lowercase().contains(q) ||
+            c.tags.any { it.lowercase().contains(q) } ||
+            c.entries.any { it.title.lowercase().contains(q) || it.text.lowercase().contains(q) }
     }
     val gratitudeHits = if (q.isBlank()) emptyList() else gratitude.filter { g ->
         g.items.any { it.lowercase().contains(q) }
@@ -113,7 +117,7 @@ fun SearchScreen(
                         }
                     }
                     if (contactHits.isNotEmpty()) {
-                        item { SectionHeader("Bağlar", subtitle = "${contactHits.size}") }
+                        item { SectionHeader("Kişiler", subtitle = "${contactHits.size}") }
                         items(contactHits, key = { "c_${it.id}" }) { contact ->
                             LimanCard(Modifier.fillMaxWidth(), onClick = { onOpenContact(contact.id) }) {
                                 Row(Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -121,9 +125,10 @@ fun SearchScreen(
                                     Spacer(Modifier.width(12.dp))
                                     Column {
                                         Text(contact.name, style = MaterialTheme.typography.titleSmall)
-                                        if (contact.bio.isNotBlank()) {
+                                        val sub = contact.title.ifBlank { contact.bio }
+                                        if (sub.isNotBlank()) {
                                             Text(
-                                                contact.bio,
+                                                sub,
                                                 style = MaterialTheme.typography.bodySmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                                                 maxLines = 1,

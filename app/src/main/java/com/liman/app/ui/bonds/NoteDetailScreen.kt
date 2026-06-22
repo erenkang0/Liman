@@ -4,13 +4,20 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,37 +40,49 @@ import com.liman.app.ui.components.FullscreenPhotoViewer
 import com.liman.app.ui.components.PhotoThumbStrip
 import com.liman.app.ui.components.SectionHeader
 import com.liman.app.ui.components.VoiceNotePlayer
+import com.liman.app.ui.components.moodIcon
 import com.liman.app.ui.theme.JournalBodyStyle
+import com.liman.app.ui.theme.LocalLimanColors
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-private val memoryDate: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("tr"))
+private val noteDate: DateTimeFormatter = DateTimeFormatter.ofPattern("d MMMM yyyy", Locale("tr"))
 
 @Composable
-fun MemoryDetailScreen(
+fun NoteDetailScreen(
     viewModel: LimanViewModel,
     contactId: String,
-    memoryId: String,
+    noteId: String,
     onBack: () -> Unit,
 ) {
     val contacts by viewModel.repository.contacts.collectAsStateWithLifecycle()
     val contact = contacts.firstOrNull { it.id == contactId }
-    val memory = contact?.memories?.firstOrNull { it.id == memoryId }
+    val entry = contact?.entries?.firstOrNull { it.id == noteId }
     var viewerIndex by remember { mutableStateOf<Int?>(null) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(memory?.title ?: "Anı") },
+                title = { Text(entry?.title?.ifBlank { "Not" } ?: "Not") },
                 navigationIcon = { BackButton(onBack) },
+                actions = {
+                    if (entry != null) {
+                        IconButton(onClick = {
+                            viewModel.repository.deleteEntry(contactId, noteId)
+                            onBack()
+                        }) {
+                            Icon(Icons.Rounded.Delete, contentDescription = "Sil", tint = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background),
             )
         },
     ) { padding ->
-        if (memory == null) {
+        if (entry == null) {
             Box(Modifier.padding(padding).fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                Text("Anı bulunamadı.")
+                Text("Not bulunamadı.")
             }
             return@Scaffold
         }
@@ -77,10 +96,10 @@ fun MemoryDetailScreen(
                 .padding(bottom = 32.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            memory.coverPhoto?.let { cover ->
+            entry.coverPhoto?.let { cover ->
                 AsyncImage(
                     model = cover,
-                    contentDescription = "Anı afişi",
+                    contentDescription = "Kapak",
                     contentScale = androidx.compose.ui.layout.ContentScale.Crop,
                     modifier = Modifier
                         .fillMaxWidth()
@@ -90,31 +109,46 @@ fun MemoryDetailScreen(
                 )
             }
 
-            Text(
-                memory.date.format(memoryDate),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-            Text(memory.title, style = MaterialTheme.typography.headlineSmall)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    entry.date.format(noteDate),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.weight(1f),
+                )
+                entry.feeling?.let {
+                    Icon(
+                        moodIcon(it),
+                        contentDescription = it.label,
+                        tint = LocalLimanColors.current.moodColor(it.score),
+                        modifier = Modifier.size(22.dp),
+                    )
+                    Spacer(Modifier.width(6.dp))
+                    Text(it.label, style = MaterialTheme.typography.labelMedium)
+                }
+            }
+            if (entry.title.isNotBlank()) {
+                Text(entry.title, style = MaterialTheme.typography.headlineSmall)
+            }
 
-            memory.voice?.let { voice ->
+            entry.voice?.let { voice ->
                 VoiceNotePlayer(voice.path, voice.durationMs, Modifier.fillMaxWidth())
             }
 
-            if (memory.note.isNotBlank()) {
-                Text(memory.note, style = JournalBodyStyle)
+            if (entry.text.isNotBlank()) {
+                Text(entry.text, style = JournalBodyStyle)
             }
 
-            if (memory.photos.size > 1) {
-                SectionHeader("Fotoğraflar", subtitle = "${memory.photos.size}")
-                PhotoThumbStrip(memory.photos, onClick = { viewerIndex = it })
+            if (entry.photos.size > 1) {
+                SectionHeader("Fotoğraflar", subtitle = "${entry.photos.size}")
+                PhotoThumbStrip(entry.photos, onClick = { viewerIndex = it })
             }
         }
     }
 
     viewerIndex?.let { idx ->
         FullscreenPhotoViewer(
-            photos = memory?.photos ?: emptyList(),
+            photos = entry?.photos ?: emptyList(),
             startIndex = idx,
             onClose = { viewerIndex = null },
         )

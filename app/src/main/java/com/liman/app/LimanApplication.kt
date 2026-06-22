@@ -3,6 +3,7 @@ package com.liman.app
 import android.app.Application
 import android.content.Context
 import com.liman.app.data.crypto.CryptoManager
+import com.liman.app.data.local.LimanStore
 import com.liman.app.data.local.SettingsStore
 import com.liman.app.data.repository.LimanRepository
 
@@ -11,9 +12,11 @@ import com.liman.app.data.repository.LimanRepository
  * ve bağımlılıklar tekil.)
  */
 class AppContainer(context: Context) {
+    private val appContext = context.applicationContext
     val crypto: CryptoManager by lazy { CryptoManager() }
-    val repository: LimanRepository by lazy { LimanRepository(crypto) }
-    val settingsStore: SettingsStore by lazy { SettingsStore(context.applicationContext) }
+    val store: LimanStore by lazy { LimanStore(appContext, crypto) }
+    val repository: LimanRepository by lazy { LimanRepository(crypto, store) }
+    val settingsStore: SettingsStore by lazy { SettingsStore(appContext) }
 }
 
 class LimanApplication : Application() {

@@ -1,5 +1,6 @@
 package com.liman.app.ui.components
 
+import androidx.annotation.DrawableRes
 import androidx.compose.animation.graphics.ExperimentalAnimationGraphicsApi
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
@@ -17,22 +18,34 @@ import androidx.compose.ui.graphics.ColorFilter
 import com.liman.app.R
 
 /**
- * İlk göründüğünde nazikçe "açan" (bloom) animasyonlu vektör. AnimatedVectorDrawable
- * (avd_bloom) Compose'da oynatılır.
+ * Bir AnimatedVectorDrawable'ı ilk göründüğünde bir kez oynatan genel yardımcı.
+ * [tint] verilirse vektör o renge boyanır.
  */
 @OptIn(ExperimentalAnimationGraphicsApi::class)
 @Composable
-fun BloomIcon(
+fun AnimatedVector(
+    @DrawableRes resId: Int,
     modifier: Modifier = Modifier,
     tint: Color = Color.Unspecified,
+    contentDescription: String? = null,
 ) {
-    val image = AnimatedImageVector.animatedVectorResource(R.drawable.avd_bloom)
-    var atEnd by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) { atEnd = true }
+    val image = AnimatedImageVector.animatedVectorResource(resId)
+    var atEnd by remember(resId) { mutableStateOf(false) }
+    LaunchedEffect(resId) { atEnd = true }
     Image(
         painter = rememberAnimatedVectorPainter(image, atEnd),
-        contentDescription = null,
+        contentDescription = contentDescription,
         modifier = modifier,
         colorFilter = if (tint == Color.Unspecified) null else ColorFilter.tint(tint),
     )
 }
+
+/** İlk göründüğünde nazikçe "açan" (bloom) animasyonlu vektör — Liman dünyası. */
+@Composable
+fun BloomIcon(modifier: Modifier = Modifier, tint: Color = Color.Unspecified) =
+    AnimatedVector(R.drawable.avd_bloom, modifier, tint)
+
+/** Yazı/kalem temalı animasyonlu vektör — Psikolog Defteri dünyası. */
+@Composable
+fun QuillIcon(modifier: Modifier = Modifier, tint: Color = Color.Unspecified) =
+    AnimatedVector(R.drawable.avd_quill, modifier, tint)

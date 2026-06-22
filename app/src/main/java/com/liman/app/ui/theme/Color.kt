@@ -50,6 +50,28 @@ val InkOnSurfaceVariant = Color(0xFFBDB3A2)
 val ErrorLight = Color(0xFFB3261E)
 val ErrorDark = Color(0xFFF2B8B5)
 
+/* --------------------------------------------------------------------------
+ * Psikolog Defteri dünyası — kırmızı / siyah / sepya, modern "deri defter".
+ * Liman'ın sıcak turuncu temasından bağımsız, sabit koyu bir şema.
+ * ------------------------------------------------------------------------ */
+val DefterBlack = Color(0xFF0E0B0A)        // en derin zemin
+val DefterSurface = Color(0xFF15110E)
+val DefterSurfaceLow = Color(0xFF1B1512)
+val DefterSurface1 = Color(0xFF221A15)
+val DefterSurface2 = Color(0xFF2B211A)     // sepya kart
+val DefterSurface3 = Color(0xFF362A20)
+val DefterCrimson = Color(0xFFC8323C)      // oxblood/crimson primary
+val DefterCrimsonDeep = Color(0xFF4A1418)
+val DefterCrimsonSoft = Color(0xFFF6C9C2)
+val DefterSepia = Color(0xFFC8A36A)        // sepya/altın aksan
+val DefterSepiaDeep = Color(0xFF3A2C18)
+val DefterSepiaSoft = Color(0xFFECD3A6)
+val DefterBrick = Color(0xFFB5705A)
+val DefterParchment = Color(0xFFE9DAC4)    // ana metin
+val DefterParchmentDim = Color(0xFFB6A488) // ikincil metin
+val DefterOutline = Color(0xFF4A3B2E)
+val DefterOutlineDim = Color(0xFF2E251D)
+
 // Akşam / gece "yıldızlı gökyüzü" — hafif koyu mavi paleti
 val NightBlueDeep = Color(0xFF12224A)   // gökyüzünün en üstü
 val NightBlueMid = Color(0xFF24386E)
@@ -176,4 +198,23 @@ val DarkLimanColors = LimanColors(
     nightSkyTop = Color(0xFF0B1530),
     nightSkyMid = Color(0xFF182A52),
     starColor = StarCool,
+)
+
+/** Psikolog Defteri dünyasının marka renkleri (sepya/kırmızı). */
+val DefterLimanColors = LimanColors(
+    bondAccent = DefterSepia,
+    bondContainer = DefterSepiaDeep,
+    onBondContainer = DefterSepiaSoft,
+    streakGold = DefterSepia,
+    lockTint = DefterCrimson,
+    moodVeryLow = Color(0xFF9C5A5A),
+    moodLow = Color(0xFFB57A5A),
+    moodNeutral = Color(0xFFC8A36A),
+    moodGood = Color(0xFFD98C5A),
+    moodGreat = Color(0xFFE0A45A),
+    warmGradientTop = Color(0xFF2A1714),
+    warmGradientBottom = DefterBlack,
+    nightSkyTop = Color(0xFF2A0E10),
+    nightSkyMid = Color(0xFF1A1010),
+    starColor = DefterSepiaSoft,
 )

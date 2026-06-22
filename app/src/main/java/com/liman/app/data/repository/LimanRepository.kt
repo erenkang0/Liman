@@ -1,12 +1,12 @@
 package com.liman.app.data.repository
 
 import com.liman.app.data.crypto.CryptoManager
+import com.liman.app.data.local.LimanStore
 import com.liman.app.data.model.Contact
-import com.liman.app.data.model.EmotionalWeather
 import com.liman.app.data.model.GratitudeEntry
 import com.liman.app.data.model.JournalEntry
 import com.liman.app.data.model.JournalFont
-import com.liman.app.data.model.Memory
+import com.liman.app.data.model.NotebookEntry
 import com.liman.app.data.model.StyleSpan
 import com.liman.app.data.model.VoiceNote
 import com.liman.app.data.model.MoodEntry
@@ -26,19 +26,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.UUID
 
 /**
- * Tek kaynaklı, bellek-içi veri deposu (uygulama yaşam döngüsü boyunca tekil).
- * Günlük gövdeleri [CryptoManager] ile cihaz içinde şifreli tutulur.
- *
- * Üretimde bu katmanın altına Room + SQLCipher / şifreli dosya kalıcılığı
- * eklenir; UI sözleşmesi (StateFlow'lar) aynı kalır.
+ * Tek kaynaklı veri deposu. Akışlar bellek-içi [MutableStateFlow]'larda tutulur;
+ * her değişiklik [LimanStore] ile cihazda **kalıcı + şifreli** olarak saklanır.
+ * Uygulama açılışında [LimanStore]'dan geri yüklenir — böylece kapat/aç'ta veri
+ * (kişiler, defterler, ruh hali, günlük) silinmez.
  */
 class LimanRepository(
     private val crypto: CryptoManager,
+    private val store: LimanStore? = null,
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.Default),
 ) {
 
@@ -60,6 +60,7 @@ class LimanRepository(
             note = note,
         )
         _moods.update { (listOf(entry) + it).sortedByDescending { m -> m.timestamp } }
+        persist()
     }
 
     fun moodFor(date: LocalDate): MoodEntry? =
@@ -96,13 +97,15 @@ class LimanRepository(
             tags = tags,
         )
         _storedJournals.update { (listOf(entry) + it).sortedByDescending { j -> j.timestamp } }
+        persist()
     }
 
     fun deleteJournal(id: String) {
         _storedJournals.update { list -> list.filterNot { it.id == id } }
+        persist()
     }
 
-    /* ----------------------------- Bağlar ------------------------------ */
+    /* ----------------------------- Kişiler ------------------------------ */
     private val _contacts = MutableStateFlow(emptyList<Contact>())
     val contacts: StateFlow<List<Contact>> = _contacts.asStateFlow()
 
@@ -113,51 +116,79 @@ class LimanRepository(
             if (list.any { it.id == contact.id }) list.map { if (it.id == contact.id) contact else it }
             else list + contact
         }
+        persist()
     }
 
+    /** Yeni kişi ekler ve oluşturulan kişinin id'sini döndürür. */
     fun addContact(
         name: String,
-        relationship: RelationshipType,
-        birthday: LocalDate?,
-        weather: EmotionalWeather,
-    ) {
+        title: String = "",
+        relationship: RelationshipType = RelationshipType.FRIEND,
+        birthday: LocalDate? = null,
+        tags: List<String> = emptyList(),
+        closeness: Int = 3,
+        accentColorArgb: Int? = null,
+    ): String {
+        val id = newId()
         upsertContact(
             Contact(
-                id = newId(),
+                id = id,
                 name = name,
+                title = title,
                 relationship = relationship,
                 birthday = birthday,
-                weather = weather,
+                tags = tags,
+                closeness = closeness,
+                accentColorArgb = accentColorArgb,
                 lastContact = LocalDate.now(),
             )
         )
+        return id
     }
 
     fun deleteContact(id: String) {
         _contacts.update { list -> list.filterNot { it.id == id } }
+        persist()
     }
 
     fun logContact(id: String, date: LocalDate = LocalDate.now()) {
         _contacts.update { list -> list.map { if (it.id == id) it.copy(lastContact = date) else it } }
+        persist()
     }
 
-    fun addMemory(
+    /** Kişinin defterine yeni bir kayıt (gözlem/not/anı) ekler. */
+    fun addEntry(
         contactId: String,
-        title: String,
-        note: String,
+        title: String = "",
+        text: String = "",
+        feeling: MoodFace? = null,
         photos: List<String> = emptyList(),
         voice: VoiceNote? = null,
+        tags: List<String> = emptyList(),
     ) {
-        val memory = Memory(
+        val entry = NotebookEntry(
             id = newId(),
             title = title,
-            note = note,
+            text = text,
+            feeling = feeling,
             photos = photos.take(5),
             voice = voice,
+            tags = tags,
         )
         _contacts.update { list ->
-            list.map { if (it.id == contactId) it.copy(memories = listOf(memory) + it.memories) else it }
+            list.map { if (it.id == contactId) it.copy(entries = listOf(entry) + it.entries) else it }
         }
+        persist()
+    }
+
+    fun deleteEntry(contactId: String, entryId: String) {
+        _contacts.update { list ->
+            list.map {
+                if (it.id == contactId) it.copy(entries = it.entries.filterNot { e -> e.id == entryId })
+                else it
+            }
+        }
+        persist()
     }
 
     /* --------------------------- Şükran defteri ------------------------- */
@@ -190,6 +221,31 @@ class LimanRepository(
 
     fun addThoughtRecord(record: ThoughtRecord) {
         _thoughtRecords.update { listOf(record.copy(id = newId())) + it }
+    }
+
+    /* ----------------------------- Kalıcılık ---------------------------- */
+    init {
+        if (store != null) {
+            scope.launch {
+                val snapshot = store.load()
+                if (snapshot.moods.isNotEmpty()) _moods.value = snapshot.moods
+                if (snapshot.journals.isNotEmpty()) _storedJournals.value = snapshot.journals
+                if (snapshot.contacts.isNotEmpty()) _contacts.value = snapshot.contacts
+            }
+        }
+    }
+
+    private fun persist() {
+        val s = store ?: return
+        scope.launch {
+            s.save(
+                LimanStore.Snapshot(
+                    moods = _moods.value,
+                    journals = _storedJournals.value,
+                    contacts = _contacts.value,
+                )
+            )
+        }
     }
 
     /* ------------------------------ Yardımcı ---------------------------- */

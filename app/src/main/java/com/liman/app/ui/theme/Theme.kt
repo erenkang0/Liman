@@ -86,6 +86,40 @@ private val DarkColorScheme = darkColorScheme(
     inversePrimary = Ember500,
 )
 
+/** Psikolog Defteri dünyası — sabit kırmızı/siyah/sepya koyu şema. */
+private val DefterColorScheme = darkColorScheme(
+    primary = DefterCrimson,
+    onPrimary = Color(0xFFFFF1EC),
+    primaryContainer = DefterCrimsonDeep,
+    onPrimaryContainer = DefterCrimsonSoft,
+    secondary = DefterSepia,
+    onSecondary = Color(0xFF2A1E0C),
+    secondaryContainer = DefterSepiaDeep,
+    onSecondaryContainer = DefterSepiaSoft,
+    tertiary = DefterBrick,
+    onTertiary = Color(0xFF2A130C),
+    tertiaryContainer = Color(0xFF3E2018),
+    onTertiaryContainer = Color(0xFFF6CBBE),
+    background = DefterBlack,
+    onBackground = DefterParchment,
+    surface = DefterSurface,
+    onSurface = DefterParchment,
+    surfaceVariant = DefterSurface2,
+    onSurfaceVariant = DefterParchmentDim,
+    surfaceContainerLowest = DefterBlack,
+    surfaceContainerLow = DefterSurfaceLow,
+    surfaceContainer = DefterSurface1,
+    surfaceContainerHigh = DefterSurface2,
+    surfaceContainerHighest = DefterSurface3,
+    outline = DefterOutline,
+    outlineVariant = DefterOutlineDim,
+    error = Color(0xFFFF8A80),
+    onError = Color(0xFF3A0A06),
+    inverseSurface = DefterParchment,
+    inverseOnSurface = DefterBlack,
+    inversePrimary = DefterCrimsonDeep,
+)
+
 val LocalLimanColors = staticCompositionLocalOf { LightLimanColors }
 
 /** Seçilen "zindelik" temasının primary ailesini temel şemaya uygular. */
@@ -137,6 +171,32 @@ fun LimanTheme(
     CompositionLocalProvider(LocalLimanColors provides limanColors) {
         MaterialTheme(
             colorScheme = colorScheme,
+            typography = LimanTypography,
+            shapes = LimanShapes,
+            content = content,
+        )
+    }
+}
+
+/**
+ * Psikolog Defteri dünyasının teması — sabit kırmızı/siyah/sepya, dinamik
+ * renkten bağımsız ve her zaman koyu. Liman dünyasının teması içine yerleştirilir.
+ */
+@Composable
+fun DefterTheme(content: @Composable () -> Unit) {
+    val view = LocalView.current
+    if (!view.isInEditMode) {
+        SideEffect {
+            val window = (view.context as Activity).window
+            WindowCompat.setDecorFitsSystemWindows(window, false)
+            val controller = WindowCompat.getInsetsController(window, view)
+            controller.isAppearanceLightStatusBars = false
+            controller.isAppearanceLightNavigationBars = false
+        }
+    }
+    CompositionLocalProvider(LocalLimanColors provides DefterLimanColors) {
+        MaterialTheme(
+            colorScheme = DefterColorScheme,
             typography = LimanTypography,
             shapes = LimanShapes,
             content = content,

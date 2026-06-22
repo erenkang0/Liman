@@ -2,6 +2,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -12,8 +13,8 @@ android {
         applicationId = "com.liman.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "1.5.0"
+        versionCode = 3
+        versionName = "1.6.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -93,6 +94,7 @@ dependencies {
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.work.runtime)
     implementation(libs.coil.compose)
+    implementation(libs.kotlinx.serialization.json)
 
     debugImplementation(libs.androidx.ui.tooling)
 }

@@ -42,12 +42,14 @@ fun buildExportText(
     }
     appendLine()
 
-    appendLine("BAĞLAR (${contacts.size})")
+    appendLine("KİŞİLER / DEFTER (${contacts.size})")
     contacts.forEach { c ->
-        appendLine("• ${c.name} — ${c.relationship.label} (${c.weather.label})")
+        val titlePart = if (c.title.isNotBlank()) " — ${c.title}" else ""
+        appendLine("• ${c.name}$titlePart (${c.relationship.label})")
+        if (c.tags.isNotEmpty()) appendLine("    Etiketler: ${c.tags.joinToString(", ")}")
         c.birthday?.let { appendLine("    Doğum günü: ${it.format(dateFmt)}") }
         c.lastContact?.let { appendLine("    Son temas: ${it.format(dateFmt)}") }
-        if (c.memories.isNotEmpty()) appendLine("    Anılar: ${c.memories.size}")
+        if (c.entries.isNotEmpty()) appendLine("    Defter notları: ${c.entries.size}")
     }
     appendLine()
 

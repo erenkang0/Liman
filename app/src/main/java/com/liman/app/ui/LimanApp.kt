@@ -20,10 +20,11 @@ import androidx.navigation.navArgument
 import com.liman.app.data.model.LockLocation
 import com.liman.app.ui.bonds.AddContactScreen
 import com.liman.app.ui.bonds.ContactProfileScreen
+import com.liman.app.ui.bonds.NoteDetailScreen
 import com.liman.app.ui.calm.CalmScreen
 import com.liman.app.ui.lock.LockReason
 import com.liman.app.ui.lock.LockScreen
-import com.liman.app.ui.bonds.MemoryDetailScreen
+import com.liman.app.ui.theme.DefterTheme
 import com.liman.app.ui.me.JournalEditorScreen
 import com.liman.app.ui.me.JournalViewerScreen
 import com.liman.app.ui.mood.MoodEntryScreen
@@ -144,18 +145,17 @@ private fun LimanNavHost(viewModel: LimanViewModel) {
         }
 
         composable(Routes.ADD_CONTACT) {
-            AddContactScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
-        }
-
-        composable(
-            route = Routes.EDIT_CONTACT_ROUTE,
-            arguments = listOf(navArgument(Routes.CONTACT_ARG) { type = NavType.StringType }),
-        ) { entry ->
-            AddContactScreen(
-                viewModel = viewModel,
-                onBack = { navController.popBackStack() },
-                editContactId = entry.arguments?.getString(Routes.CONTACT_ARG),
-            )
+            DefterTheme {
+                AddContactScreen(
+                    viewModel = viewModel,
+                    onBack = { navController.popBackStack() },
+                    onSaved = { id ->
+                        navController.navigate(Routes.contact(id)) {
+                            popUpTo(Routes.ADD_CONTACT) { inclusive = true }
+                        }
+                    },
+                )
+            }
         }
 
         composable(
@@ -163,12 +163,14 @@ private fun LimanNavHost(viewModel: LimanViewModel) {
             arguments = listOf(navArgument(Routes.CONTACT_ARG) { type = NavType.StringType }),
         ) { entry ->
             val id = entry.arguments?.getString(Routes.CONTACT_ARG).orEmpty()
-            ContactProfileScreen(
-                viewModel = viewModel,
-                contactId = id,
-                onBack = { navController.popBackStack() },
-                onOpenMemory = { memoryId -> navController.navigate(Routes.memory(id, memoryId)) },
-            )
+            DefterTheme {
+                ContactProfileScreen(
+                    viewModel = viewModel,
+                    contactId = id,
+                    onBack = { navController.popBackStack() },
+                    onOpenNote = { noteId -> navController.navigate(Routes.note(id, noteId)) },
+                )
+            }
         }
 
         composable(
@@ -184,18 +186,20 @@ private fun LimanNavHost(viewModel: LimanViewModel) {
         }
 
         composable(
-            route = Routes.MEMORY_ROUTE,
+            route = Routes.NOTE_ROUTE,
             arguments = listOf(
-                navArgument(Routes.MEMORY_CONTACT_ARG) { type = NavType.StringType },
-                navArgument(Routes.MEMORY_ARG) { type = NavType.StringType },
+                navArgument(Routes.NOTE_CONTACT_ARG) { type = NavType.StringType },
+                navArgument(Routes.NOTE_ARG) { type = NavType.StringType },
             ),
         ) { entry ->
-            MemoryDetailScreen(
-                viewModel = viewModel,
-                contactId = entry.arguments?.getString(Routes.MEMORY_CONTACT_ARG).orEmpty(),
-                memoryId = entry.arguments?.getString(Routes.MEMORY_ARG).orEmpty(),
-                onBack = { navController.popBackStack() },
-            )
+            DefterTheme {
+                NoteDetailScreen(
+                    viewModel = viewModel,
+                    contactId = entry.arguments?.getString(Routes.NOTE_CONTACT_ARG).orEmpty(),
+                    noteId = entry.arguments?.getString(Routes.NOTE_ARG).orEmpty(),
+                    onBack = { navController.popBackStack() },
+                )
+            }
         }
 
         composable(Routes.TOOL_BREATHING) {

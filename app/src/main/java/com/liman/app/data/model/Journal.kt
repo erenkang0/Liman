@@ -1,8 +1,14 @@
+@file:UseSerializers(LocalDateTimeSerializer::class)
+
 package com.liman.app.data.model
 
+import com.liman.app.data.local.LocalDateTimeSerializer
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.UseSerializers
 import java.time.LocalDateTime
 
 /** Günlük metni için yazı tipi seçenekleri. */
+@Serializable
 enum class JournalFont(val label: String) {
     SERIF("Zarif"),
     SANS("Modern"),
@@ -14,6 +20,7 @@ enum class JournalFont(val label: String) {
  * (asterisksiz) saklanır, biçim ayrı meta veridir — kullanıcı yazarken anlık olarak
  * uygulanır, ekranda yıldız/işaret görünmez.
  */
+@Serializable
 data class StyleSpan(
     val start: Int,
     val end: Int,
@@ -23,6 +30,7 @@ data class StyleSpan(
 )
 
 /** Sesli not. [path] cihazdaki dosya yolu. */
+@Serializable
 data class VoiceNote(
     val path: String,
     val durationMs: Long,
@@ -33,6 +41,7 @@ data class VoiceNote(
  * [body] depolama katmanında uçtan uca şifreli tutulur (bkz. CryptoManager);
  * bellekte/UI'da düz metin olarak taşınır. Biçim [spans] içinde tutulur.
  */
+@Serializable
 data class JournalEntry(
     val id: String,
     val title: String = "",

@@ -43,6 +43,7 @@ import com.liman.app.ui.copy.LocalCopy
 enum class LockReason(val title: String, val subtitle: String) {
     APP_OPEN("Liman kilitli", "Devam etmek için kimliğini doğrula"),
     INNER_WORLD("İç dünyan kilitli", "Ham, savunmasız duyguların güvende. Devam etmek için doğrula"),
+    DEFTER("Defter kilitli", "İnsanlar hakkında yazdıkların yalnızca sana ait. Devam etmek için doğrula"),
 }
 
 /**
