@@ -37,7 +37,9 @@ import androidx.compose.material3.FilledIconToggleButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.InputChip
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -96,6 +98,8 @@ fun JournalEditorScreen(
     var mood by remember { mutableStateOf<MoodFace?>(null) }
 
     val photos = remember { mutableStateListOf<String>() }
+    val tags = remember { mutableStateListOf<String>() }
+    var tagInput by remember { mutableStateOf("") }
     var voicePath by remember { mutableStateOf<String?>(null) }
     var voiceDurationMs by remember { mutableLongStateOf(0L) }
 
@@ -170,6 +174,7 @@ fun JournalEditorScreen(
                                 moodFace = mood,
                                 voice = voicePath?.let { VoiceNote(it, voiceDurationMs) },
                                 photos = photos.toList(),
+                                tags = tags.toList(),
                             )
                             onSaved()
                         },
@@ -271,6 +276,39 @@ fun JournalEditorScreen(
             // Ruh hali etiketi
             Text("Ruh halini etiketle", style = MaterialTheme.typography.titleSmall)
             MoodFaceRow(selected = mood, onSelect = { mood = it }, bubbleSize = 48)
+
+            // Etiketler
+            Text("Etiketler", style = MaterialTheme.typography.titleSmall)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                OutlinedTextField(
+                    value = tagInput,
+                    onValueChange = { tagInput = it },
+                    placeholder = { Text("Etiket ekle") },
+                    singleLine = true,
+                    modifier = Modifier.weight(1f),
+                )
+                Spacer(Modifier.width(8.dp))
+                TextButton(
+                    onClick = {
+                        val t = tagInput.trim().removePrefix("#")
+                        if (t.isNotEmpty() && !tags.contains(t)) tags.add(t)
+                        tagInput = ""
+                    },
+                    enabled = tagInput.isNotBlank(),
+                ) { Text("Ekle") }
+            }
+            if (tags.isNotEmpty()) {
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    tags.forEach { tag ->
+                        InputChip(
+                            selected = false,
+                            onClick = { tags.remove(tag) },
+                            label = { Text("#$tag") },
+                            trailingIcon = { Icon(Icons.Rounded.Close, "Kaldır", modifier = Modifier.size(16.dp)) },
+                        )
+                    }
+                }
+            }
             Spacer(Modifier.height(24.dp))
         }
     }

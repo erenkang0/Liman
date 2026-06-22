@@ -1,5 +1,6 @@
 package com.liman.app.ui.settings
 
+import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -42,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
@@ -49,6 +51,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.liman.app.data.model.AutoLock
 import com.liman.app.data.model.Gender
 import com.liman.app.data.model.LockLocation
+import com.liman.app.data.export.buildExportText
 import com.liman.app.data.model.NotificationPrefs
 import com.liman.app.data.model.ThemeMode
 import com.liman.app.data.model.ThemePalette
@@ -68,6 +71,7 @@ fun SettingsScreen(
     onOpenReminders: () -> Unit = {},
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val context = LocalContext.current
     var showPinDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var nameDraft by remember(settings.profile.name) { mutableStateOf(settings.profile.name) }
@@ -263,8 +267,28 @@ fun SettingsScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Spacer(Modifier.height(8.dp))
-                NavRow("Yedekle") { }
-                NavRow("Dışa aktar") { }
+                NavRow("Dışa aktar") {
+                    val repo = viewModel.repository
+                    val text = buildExportText(
+                        name = settings.profile.name,
+                        moods = repo.moods.value,
+                        journals = repo.journals.value,
+                        contacts = repo.contacts.value,
+                        gratitude = repo.gratitude.value,
+                        capsules = repo.capsules.value,
+                    )
+                    runCatching {
+                        context.startActivity(
+                            Intent.createChooser(
+                                Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, text)
+                                },
+                                "Liman verisini dışa aktar",
+                            )
+                        )
+                    }
+                }
                 NavRow("Hesabı sil", destructive = true) { showDeleteDialog = true }
             }
 

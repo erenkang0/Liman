@@ -29,6 +29,8 @@ import com.liman.app.ui.me.JournalViewerScreen
 import com.liman.app.ui.mood.MoodEntryScreen
 import com.liman.app.ui.navigation.Routes
 import com.liman.app.ui.onboarding.OnboardingScreen
+import com.liman.app.ui.report.WeeklyReportScreen
+import com.liman.app.ui.search.SearchScreen
 import com.liman.app.ui.settings.RemindersScreen
 import com.liman.app.ui.settings.SettingsScreen
 import com.liman.app.ui.tools.BreathingScreen
@@ -110,6 +112,19 @@ private fun LimanNavHost(viewModel: LimanViewModel) {
                 onOpenBreathing = { navController.navigate(Routes.TOOL_BREATHING) },
                 onOpenBonds = { navController.popBackStack() },
             )
+        }
+
+        composable(Routes.SEARCH) {
+            SearchScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onOpenJournal = { navController.navigate(Routes.journal(it)) },
+                onOpenContact = { navController.navigate(Routes.contact(it)) },
+            )
+        }
+
+        composable(Routes.WEEKLY_REPORT) {
+            WeeklyReportScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
         }
 
         composable(Routes.MOOD_ENTRY) {

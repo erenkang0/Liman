@@ -82,6 +82,7 @@ class LimanRepository(
         moodFace: MoodFace? = null,
         voice: VoiceNote? = null,
         photos: List<String> = emptyList(),
+        tags: List<String> = emptyList(),
     ) {
         val entry = JournalEntry(
             id = newId(),
@@ -92,6 +93,7 @@ class LimanRepository(
             moodFace = moodFace,
             voice = voice,
             photos = photos.take(5),
+            tags = tags,
         )
         _storedJournals.update { (listOf(entry) + it).sortedByDescending { j -> j.timestamp } }
     }

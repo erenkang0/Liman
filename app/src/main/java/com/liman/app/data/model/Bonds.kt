@@ -43,6 +43,8 @@ data class Contact(
     val weatherNote: String = "",
     val birthday: LocalDate? = null,
     val lastContact: LocalDate? = null,
+    /** İletişimde kalma hedefi (gün). null = kapalı. */
+    val keepInTouchDays: Int? = null,
     val memories: List<Memory> = emptyList(),
     /** Yerel albüm fotoğrafları (en fazla 5). */
     val photos: List<String> = emptyList(),
@@ -67,5 +69,13 @@ data class Contact(
     fun daysSinceContact(today: LocalDate = LocalDate.now()): Long? {
         val l = lastContact ?: return null
         return ChronoUnit.DAYS.between(l, today)
+    }
+
+    /** İletişim hedefini ne kadar aştın (gün)? null = hedef yok / aşılmadı. */
+    fun keepInTouchOverdueDays(today: LocalDate = LocalDate.now()): Long? {
+        val cadence = keepInTouchDays ?: return null
+        val since = daysSinceContact(today) ?: return null
+        val over = since - cadence
+        return if (over > 0) over else null
     }
 }

@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.Spa
+import androidx.compose.material.icons.rounded.Summarize
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -54,6 +56,7 @@ import com.liman.app.ui.theme.LocalLimanColors
 fun InsightScreen(
     viewModel: LimanViewModel,
     onShare: () -> Unit,
+    onOpenReport: () -> Unit,
 ) {
     val moods by viewModel.repository.moods.collectAsStateWithLifecycle()
     val contacts by viewModel.repository.contacts.collectAsStateWithLifecycle()
@@ -109,6 +112,24 @@ fun InsightScreen(
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
+            }
+        }
+
+        // Haftalık rapor kısayolu
+        LimanCard(
+            Modifier.fillMaxWidth(),
+            containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+            contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            onClick = onOpenReport,
+        ) {
+            Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Rounded.Summarize, contentDescription = null)
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text("Haftalık rapor", style = MaterialTheme.typography.titleMedium)
+                    Text("Son 7 günün nazik özeti", style = MaterialTheme.typography.bodySmall)
+                }
+                Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null)
             }
         }
 

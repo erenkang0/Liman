@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -164,6 +165,22 @@ fun JournalViewerScreen(
                             buildJournalAnnotated(entry.body, entry.spans),
                             style = JournalBodyStyle.copy(fontFamily = entry.font.toFontFamily()),
                         )
+                    }
+
+                    if (entry.tags.isNotEmpty()) {
+                        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            entry.tags.forEach { tag ->
+                                Text(
+                                    "#$tag",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    modifier = Modifier
+                                        .clip(MaterialTheme.shapes.small)
+                                        .background(MaterialTheme.colorScheme.secondaryContainer)
+                                        .padding(horizontal = 10.dp, vertical = 5.dp),
+                                )
+                            }
+                        }
                     }
 
                     if (entry.photos.size > 1) {

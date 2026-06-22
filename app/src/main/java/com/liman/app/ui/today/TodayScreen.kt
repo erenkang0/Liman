@@ -22,10 +22,12 @@ import androidx.compose.material.icons.rounded.Cake
 import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.LocalFireDepartment
+import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -69,6 +71,7 @@ fun TodayScreen(
     onOpenTool: (String) -> Unit,
     onOpenContact: (String) -> Unit,
     onOpenCalm: () -> Unit,
+    onOpenSearch: () -> Unit,
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val journals by viewModel.repository.journals.collectAsStateWithLifecycle()
@@ -109,6 +112,10 @@ fun TodayScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
+                IconButton(onClick = onOpenSearch) {
+                    Icon(Icons.Rounded.Search, contentDescription = "Ara", tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Spacer(Modifier.width(4.dp))
                 ProfileAvatar(
                     photoUri = settings.profile.photoUri,
                     initial = name.firstOrNull()?.uppercase() ?: "",

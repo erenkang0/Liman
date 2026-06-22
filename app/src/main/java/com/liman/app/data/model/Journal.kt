@@ -43,6 +43,7 @@ data class JournalEntry(
     val voice: VoiceNote? = null,
     /** Yerel fotoğraf URI'leri (en fazla 5). İlk fotoğraf "afiş" (kapak) olur. */
     val photos: List<String> = emptyList(),
+    val tags: List<String> = emptyList(),
     val timestamp: LocalDateTime = LocalDateTime.now(),
 ) {
     val coverPhoto: String? get() = photos.firstOrNull()

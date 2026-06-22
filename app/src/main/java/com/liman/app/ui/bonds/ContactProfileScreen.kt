@@ -238,6 +238,41 @@ fun ContactProfileScreen(
                     }
                 }
 
+                // İletişim ritmi (keep-in-touch)
+                AnimatedEntrance(delayMillis = 235) {
+                    LimanCard(Modifier.fillMaxWidth()) {
+                        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            Text("İletişim ritmi", style = MaterialTheme.typography.titleMedium)
+                            Text(
+                                "Bu bağı sıcak tutmak için ne sıklıkta haberleşmek istersin?",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                listOf<Pair<String, Int?>>(
+                                    "Kapalı" to null,
+                                    "Haftalık" to 7,
+                                    "İki haftada" to 14,
+                                    "Aylık" to 30,
+                                ).forEach { (label, days) ->
+                                    FilterChip(
+                                        selected = contact.keepInTouchDays == days,
+                                        onClick = { viewModel.repository.upsertContact(contact.copy(keepInTouchDays = days)) },
+                                        label = { Text(label) },
+                                    )
+                                }
+                            }
+                            contact.keepInTouchOverdueDays(today)?.let { over ->
+                                Text(
+                                    "Hedefini $over gün aştın — kısa bir merhaba iyi gelebilir.",
+                                    style = MaterialTheme.typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.primary,
+                                )
+                            }
+                        }
+                    }
+                }
+
                 // Fotoğraf albümü
                 AnimatedEntrance(delayMillis = 260) {
                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {

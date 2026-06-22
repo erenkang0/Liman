@@ -239,6 +239,7 @@ fun MainScaffold(
                         onOpenTool = { rootNavController.navigate(it) },
                         onOpenContact = { rootNavController.navigate(Routes.contact(it)) },
                         onOpenCalm = { rootNavController.navigate(Routes.CALM) },
+                        onOpenSearch = { rootNavController.navigate(Routes.SEARCH) },
                     )
 
                     Tab.ME -> if (innerWorldLocked) {
@@ -266,6 +267,7 @@ fun MainScaffold(
                     Tab.INSIGHT -> InsightScreen(
                         viewModel = viewModel,
                         onShare = { shareInsight() },
+                        onOpenReport = { rootNavController.navigate(Routes.WEEKLY_REPORT) },
                     )
                 }
             }

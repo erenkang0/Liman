@@ -19,6 +19,8 @@ object Routes {
     const val SETTINGS = "settings"
     const val REMINDERS = "reminders"
     const val CALM = "calm"
+    const val SEARCH = "search"
+    const val WEEKLY_REPORT = "weekly_report"
     const val MOOD_ENTRY = "mood_entry"
     const val JOURNAL_EDITOR = "journal_editor"
     const val ADD_CONTACT = "add_contact"
