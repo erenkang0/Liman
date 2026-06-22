@@ -14,9 +14,11 @@ import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.material3.ColorScheme
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.liman.app.data.model.ThemePalette
 
 private val LightColorScheme = lightColorScheme(
     primary = Ember500,
@@ -86,9 +88,26 @@ private val DarkColorScheme = darkColorScheme(
 
 val LocalLimanColors = staticCompositionLocalOf { LightLimanColors }
 
+/** Seçilen "zindelik" temasının primary ailesini temel şemaya uygular. */
+private fun ColorScheme.withPalette(spec: PaletteSpec, dark: Boolean): ColorScheme =
+    if (dark) copy(
+        primary = spec.primaryDark,
+        onPrimary = spec.onPrimaryDark,
+        primaryContainer = spec.primaryContainerDark,
+        onPrimaryContainer = spec.onPrimaryContainerDark,
+        inversePrimary = spec.primaryLight,
+    ) else copy(
+        primary = spec.primaryLight,
+        onPrimary = spec.onPrimaryLight,
+        primaryContainer = spec.primaryContainerLight,
+        onPrimaryContainer = spec.onPrimaryContainerLight,
+        inversePrimary = spec.primaryDark,
+    )
+
 @Composable
 fun LimanTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
+    palette: ThemePalette = ThemePalette.EMBER,
     // Material You — destekleyen cihazlarda dinamik renk
     dynamicColor: Boolean = false,
     content: @Composable () -> Unit,
@@ -98,8 +117,8 @@ fun LimanTheme(
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+        darkTheme -> DarkColorScheme.withPalette(paletteSpec(palette), dark = true)
+        else -> LightColorScheme.withPalette(paletteSpec(palette), dark = false)
     }
     val limanColors = if (darkTheme) DarkLimanColors else LightLimanColors
 

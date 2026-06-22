@@ -121,6 +121,17 @@ private fun LimanNavHost(viewModel: LimanViewModel) {
         }
 
         composable(
+            route = Routes.EDIT_CONTACT_ROUTE,
+            arguments = listOf(navArgument(Routes.CONTACT_ARG) { type = NavType.StringType }),
+        ) { entry ->
+            AddContactScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                editContactId = entry.arguments?.getString(Routes.CONTACT_ARG),
+            )
+        }
+
+        composable(
             route = Routes.CONTACT_ROUTE,
             arguments = listOf(navArgument(Routes.CONTACT_ARG) { type = NavType.StringType }),
         ) { entry ->

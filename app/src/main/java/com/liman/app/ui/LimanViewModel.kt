@@ -10,6 +10,7 @@ import com.liman.app.data.model.AutoLock
 import com.liman.app.data.model.Gender
 import com.liman.app.data.model.LockLocation
 import com.liman.app.data.model.ThemeMode
+import com.liman.app.data.model.ThemePalette
 import com.liman.app.data.model.UserProfile
 import com.liman.app.data.repository.LimanRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -96,6 +97,7 @@ class LimanViewModel(app: Application) : AndroidViewModel(app) {
         edit { it.copy(profile = profile) }
 
     fun setThemeMode(mode: ThemeMode) = edit { it.copy(themeMode = mode) }
+    fun setThemePalette(palette: ThemePalette) = edit { it.copy(themePalette = palette) }
     fun setDynamicColor(enabled: Boolean) = edit { it.copy(dynamicColor = enabled) }
     fun setLockEnabled(enabled: Boolean) = edit { it.copy(lockEnabled = enabled) }
     fun setLockLocation(location: LockLocation) = edit { it.copy(lockLocation = location) }

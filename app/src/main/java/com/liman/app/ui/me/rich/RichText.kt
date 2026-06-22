@@ -120,10 +120,6 @@ class RichTextState(
         value = new
     }
 
-    fun setFont(choice: JournalFont) {
-        font = choice
-    }
-
     fun toggleBold() = toggle(Flag.BOLD)
     fun toggleItalic() = toggle(Flag.ITALIC)
     fun toggleUnderline() = toggle(Flag.UNDERLINE)

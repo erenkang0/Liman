@@ -43,18 +43,23 @@ import java.time.ZoneId
 fun AddContactScreen(
     viewModel: LimanViewModel,
     onBack: () -> Unit,
+    editContactId: String? = null,
 ) {
-    var name by remember { mutableStateOf("") }
-    var relationship by remember { mutableStateOf(RelationshipType.FRIEND) }
-    var weather by remember { mutableStateOf(EmotionalWeather.CALM) }
-    var birthday by remember { mutableStateOf<LocalDate?>(null) }
+    val existing = remember(editContactId) { editContactId?.let { viewModel.repository.contact(it) } }
+    val isEdit = existing != null
+
+    var name by remember { mutableStateOf(existing?.name ?: "") }
+    var bio by remember { mutableStateOf(existing?.bio ?: "") }
+    var relationship by remember { mutableStateOf(existing?.relationship ?: RelationshipType.FRIEND) }
+    var weather by remember { mutableStateOf(existing?.weather ?: EmotionalWeather.CALM) }
+    var birthday by remember { mutableStateOf(existing?.birthday) }
     var showDatePicker by remember { mutableStateOf(false) }
 
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Kişi ekle") },
+                title = { Text(if (isEdit) "Kişiyi düzenle" else "Kişi ekle") },
                 navigationIcon = { BackButton(onBack) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -75,6 +80,13 @@ fun AddContactScreen(
                 onValueChange = { name = it },
                 label = { Text("İsim") },
                 singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+            )
+
+            OutlinedTextField(
+                value = bio,
+                onValueChange = { bio = it },
+                label = { Text("Kısa not / bio (opsiyonel)") },
                 modifier = Modifier.fillMaxWidth(),
             )
 
@@ -113,7 +125,19 @@ fun AddContactScreen(
             Button(
                 onClick = {
                     if (name.isNotBlank()) {
-                        viewModel.repository.addContact(name.trim(), relationship, birthday, weather)
+                        if (existing != null) {
+                            viewModel.repository.upsertContact(
+                                existing.copy(
+                                    name = name.trim(),
+                                    bio = bio.trim(),
+                                    relationship = relationship,
+                                    weather = weather,
+                                    birthday = birthday,
+                                )
+                            )
+                        } else {
+                            viewModel.repository.addContact(name.trim(), relationship, birthday, weather)
+                        }
                         onBack()
                     }
                 },

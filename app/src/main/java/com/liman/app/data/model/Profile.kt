@@ -23,6 +23,15 @@ enum class ThemeMode(val label: String) {
     DARK("Koyu"),
 }
 
+/** 5 ayrı "zindelik" renk teması. Renkler ui katmanında eşlenir. */
+enum class ThemePalette(val label: String) {
+    EMBER("Zinde Turuncu"),
+    OCEAN("Sakin Okyanus"),
+    FOREST("Diri Orman"),
+    LAVENDER("Huzur Lavanta"),
+    ROSE("Sıcak Gül"),
+}
+
 /** Kilit nerede devreye girsin? */
 enum class LockLocation(val label: String, val description: String) {
     INNER_WORLD_ONLY("Yalnızca iç dünya", "Bağlar kilitsiz kalır; kilit yalnızca Ben'e girerken"),
@@ -57,6 +66,7 @@ data class AppSettings(
     val profile: UserProfile = UserProfile(),
     val onboarded: Boolean = false,
     val themeMode: ThemeMode = ThemeMode.SYSTEM,
+    val themePalette: ThemePalette = ThemePalette.EMBER,
     val dynamicColor: Boolean = false,
     val lockEnabled: Boolean = true,
     val lockLocation: LockLocation = LockLocation.INNER_WORLD_ONLY,

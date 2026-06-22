@@ -1,6 +1,8 @@
 package com.liman.app.ui.settings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
@@ -8,6 +10,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
@@ -29,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
@@ -38,10 +43,12 @@ import com.liman.app.data.model.Gender
 import com.liman.app.data.model.LockLocation
 import com.liman.app.data.model.NotificationPrefs
 import com.liman.app.data.model.ThemeMode
+import com.liman.app.data.model.ThemePalette
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.copy.LocalCopy
+import com.liman.app.ui.theme.swatch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -196,6 +203,33 @@ fun SettingsScreen(
                             label = { Text(mode.label) },
                         )
                     }
+                }
+                HorizontalDivider(Modifier.padding(vertical = 8.dp))
+                Text("Zindelik teması", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(8.dp))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ThemePalette.entries.forEach { palette ->
+                        FilterChip(
+                            selected = settings.themePalette == palette,
+                            onClick = { viewModel.setThemePalette(palette) },
+                            label = { Text(palette.label) },
+                            leadingIcon = {
+                                Box(
+                                    Modifier
+                                        .size(16.dp)
+                                        .clip(CircleShape)
+                                        .background(palette.swatch()),
+                                )
+                            },
+                        )
+                    }
+                }
+                if (settings.dynamicColor) {
+                    Text(
+                        "Dinamik renk açıkken zindelik teması uygulanmaz.",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
                 HorizontalDivider(Modifier.padding(vertical = 8.dp))
                 SwitchRow("Dinamik renk", "Material You — duvar kâğıdından renk", settings.dynamicColor) {

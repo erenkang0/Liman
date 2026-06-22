@@ -2,6 +2,7 @@ package com.liman.app.ui.theme
 
 import androidx.compose.runtime.Immutable
 import androidx.compose.ui.graphics.Color
+import com.liman.app.data.model.ThemePalette
 
 /* --------------------------------------------------------------------------
  * Liman renk paleti
@@ -106,6 +107,58 @@ val LightLimanColors = LimanColors(
     nightSkyMid = NightBlueMid,
     starColor = StarLight,
 )
+
+/* --------------------------------------------------------------------------
+ * 5 "zindelik" teması — yalnızca primary (ana zindelik rengi) ailesini değiştirir;
+ * sosyal yeşil aksan ve ruh hali renkleri sabit kalır.
+ * ------------------------------------------------------------------------ */
+@Immutable
+data class PaletteSpec(
+    val primaryLight: Color,
+    val onPrimaryLight: Color,
+    val primaryContainerLight: Color,
+    val onPrimaryContainerLight: Color,
+    val primaryDark: Color,
+    val onPrimaryDark: Color,
+    val primaryContainerDark: Color,
+    val onPrimaryContainerDark: Color,
+)
+
+fun paletteSpec(palette: ThemePalette): PaletteSpec = when (palette) {
+    ThemePalette.EMBER -> PaletteSpec(
+        primaryLight = Color(0xFFD9641A), onPrimaryLight = Color.White,
+        primaryContainerLight = Color(0xFFFFDCC4), onPrimaryContainerLight = Color(0xFF3B1700),
+        primaryDark = Color(0xFFFFB077), onPrimaryDark = Color(0xFF4A1E00),
+        primaryContainerDark = Color(0xFF5C2C0A), onPrimaryContainerDark = Color(0xFFFFD9BE),
+    )
+    ThemePalette.OCEAN -> PaletteSpec(
+        primaryLight = Color(0xFF0E7C99), onPrimaryLight = Color.White,
+        primaryContainerLight = Color(0xFFB8E7F4), onPrimaryContainerLight = Color(0xFF00323F),
+        primaryDark = Color(0xFF74D2EC), onPrimaryDark = Color(0xFF00323F),
+        primaryContainerDark = Color(0xFF063D4D), onPrimaryContainerDark = Color(0xFFB8E7F4),
+    )
+    ThemePalette.FOREST -> PaletteSpec(
+        primaryLight = Color(0xFF2E8B57), onPrimaryLight = Color.White,
+        primaryContainerLight = Color(0xFFBBEBCB), onPrimaryContainerLight = Color(0xFF06301B),
+        primaryDark = Color(0xFF86D6A6), onPrimaryDark = Color(0xFF06351E),
+        primaryContainerDark = Color(0xFF13432B), onPrimaryContainerDark = Color(0xFFBBEBCB),
+    )
+    ThemePalette.LAVENDER -> PaletteSpec(
+        primaryLight = Color(0xFF6A4FC4), onPrimaryLight = Color.White,
+        primaryContainerLight = Color(0xFFE5DEFF), onPrimaryContainerLight = Color(0xFF23055E),
+        primaryDark = Color(0xFFC9BCFF), onPrimaryDark = Color(0xFF2B0E6F),
+        primaryContainerDark = Color(0xFF3C2E7C), onPrimaryContainerDark = Color(0xFFE5DEFF),
+    )
+    ThemePalette.ROSE -> PaletteSpec(
+        primaryLight = Color(0xFFC24468), onPrimaryLight = Color.White,
+        primaryContainerLight = Color(0xFFFFD9E1), onPrimaryContainerLight = Color(0xFF3E0720),
+        primaryDark = Color(0xFFF6A8BD), onPrimaryDark = Color(0xFF5A0A2A),
+        primaryContainerDark = Color(0xFF6E1437), onPrimaryContainerDark = Color(0xFFFFD9E2),
+    )
+}
+
+/** Tema seçici için örnek (swatch) rengi. */
+fun ThemePalette.swatch(): Color = paletteSpec(this).primaryLight
 
 val DarkLimanColors = LimanColors(
     bondAccent = Sage300,

@@ -13,6 +13,7 @@ import com.liman.app.data.model.AutoLock
 import com.liman.app.data.model.Gender
 import com.liman.app.data.model.LockLocation
 import com.liman.app.data.model.ThemeMode
+import com.liman.app.data.model.ThemePalette
 import com.liman.app.data.model.UserProfile
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -48,6 +49,8 @@ class SettingsStore(private val context: Context) {
             onboarded = this[Keys.onboarded] ?: false,
             themeMode = this[Keys.themeMode]?.let { runCatching { ThemeMode.valueOf(it) }.getOrNull() }
                 ?: ThemeMode.SYSTEM,
+            themePalette = this[Keys.themePalette]?.let { runCatching { ThemePalette.valueOf(it) }.getOrNull() }
+                ?: ThemePalette.EMBER,
             dynamicColor = this[Keys.dynamicColor] ?: false,
             lockEnabled = this[Keys.lockEnabled] ?: true,
             lockLocation = this[Keys.lockLocation]?.let { runCatching { LockLocation.valueOf(it) }.getOrNull() }
@@ -65,6 +68,7 @@ class SettingsStore(private val context: Context) {
         s.profile.birthDate?.let { this[Keys.birthDate] = it.toEpochDay() }
         s.profile.gender?.let { this[Keys.gender] = it.name }
         this[Keys.themeMode] = s.themeMode.name
+        this[Keys.themePalette] = s.themePalette.name
         this[Keys.dynamicColor] = s.dynamicColor
         this[Keys.lockEnabled] = s.lockEnabled
         this[Keys.lockLocation] = s.lockLocation.name
@@ -79,6 +83,7 @@ class SettingsStore(private val context: Context) {
         val birthDate = longPreferencesKey("profile_birth")
         val gender = stringPreferencesKey("profile_gender")
         val themeMode = stringPreferencesKey("theme_mode")
+        val themePalette = stringPreferencesKey("theme_palette")
         val dynamicColor = booleanPreferencesKey("dynamic_color")
         val lockEnabled = booleanPreferencesKey("lock_enabled")
         val lockLocation = stringPreferencesKey("lock_location")

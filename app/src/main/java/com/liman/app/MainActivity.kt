@@ -38,7 +38,11 @@ class MainActivity : FragmentActivity() {
                 ThemeMode.DARK -> true
             }
             val copy = remember(settings.profile.gender) { copyFor(settings.profile.gender) }
-            LimanTheme(darkTheme = dark, dynamicColor = settings.dynamicColor) {
+            LimanTheme(
+                darkTheme = dark,
+                palette = settings.themePalette,
+                dynamicColor = settings.dynamicColor,
+            ) {
                 CompositionLocalProvider(LocalCopy provides copy) {
                     LimanApp(viewModel)
                 }

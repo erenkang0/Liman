@@ -301,7 +301,7 @@ private fun FormattingToolbar(rich: RichTextState) {
             JournalFont.entries.forEach { f ->
                 FilterChip(
                     selected = rich.font == f,
-                    onClick = { rich.setFont(f) },
+                    onClick = { rich.font = f },
                     label = { Text(f.label) },
                 )
             }

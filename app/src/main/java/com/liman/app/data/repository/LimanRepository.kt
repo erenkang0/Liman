@@ -131,6 +131,10 @@ class LimanRepository(
         )
     }
 
+    fun deleteContact(id: String) {
+        _contacts.update { list -> list.filterNot { it.id == id } }
+    }
+
     fun logContact(id: String, date: LocalDate = LocalDate.now()) {
         _contacts.update { list -> list.map { if (it.id == id) it.copy(lastContact = date) else it } }
     }
