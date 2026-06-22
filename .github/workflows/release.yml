@@ -41,8 +41,8 @@ jobs:
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v1.6.0' }}
-          name: Liman v1.6.0
+          tag_name: ${{ github.ref_type == 'tag' && github.ref_name || 'v2.0.0' }}
+          name: Liman v2.0.0
           files: app/build/outputs/apk/release/*.apk
           generate_release_notes: true
           make_latest: true

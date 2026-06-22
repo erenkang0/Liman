@@ -57,8 +57,9 @@ Her danışan dosyası: serbest **etiketler/temalar** (örn. *anksiyete · yas*)
 
 ---
 
-## 🆕 Sürüm 1.6.0 yenilikleri
+## 🆕 Sürüm 2.0.0 yenilikleri
 
+- 🔗 **@bağlantı motoru** — notlarda `@` ile danışan, defter kaydı veya günlüğe canlı bağ kur; tıklayınca o kayda git.
 - 🩺 **Profesyonel psikolog araçları** — danışan dosyaları, **SOAP** seans notları (S/O/A/P + süre),
   **randevu** planlama, **tedavi hedefleri** (yapılacaklar) ve **risk/durum** takibi.
 - 📊 **Klinik pano** — aktif danışan, bu haftaki randevular, risk takibi, uzun süredir görülmeyenler.
@@ -69,7 +70,7 @@ Her danışan dosyası: serbest **etiketler/temalar** (örn. *anksiyete · yas*)
 - 🎞️ **Daha bol animasyon** — dünyaya özel canlı arka plan (Liman: dalga + yıldız; Defter: kıvılcım +
   parıltı) ve yeni animasyonlu vektör. *"Duygusal hava" kaldırıldı.*
 
-<details><summary>Sürüm 1.5.0</summary>
+<details><summary>Sürüm 1.5.0 / 1.6.0</summary>
 
 - Tüm emojiler ikonlara dönüştü, kilit ekranı sıfırdan tasarlandı, profil fotoğrafı, arama,
   veri dışa aktarma, haftalık rapor, günlük etiketleri, iletişim ritmi.
