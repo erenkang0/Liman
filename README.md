@@ -2,9 +2,9 @@
 
 # 🌅 Liman
 
-### Zihnine ve bağlarına bir liman
+### Profesyonel psikolog defteri + zihnine bir liman
 
-*Bireysel psikolojik iyi oluş ile sosyal ilişkileri dengeli biçimde harmanlayan bir **Zihinsel Sağlık & Sosyal Bağ Günlüğü***
+*Psikologlar için **klinik danışan defteri** (SOAP seans notları, randevu, tedavi planı) ile kişisel iyi oluş günlüğünü iç içe getiren uygulama.*
 
 <br/>
 
@@ -16,22 +16,27 @@
 <br/>
 
 ```
-☀️ Bugün        🔒 Ben        💚 Bağlar        📈 İçgörü
+📓 Defter   ⇄   🌅 Liman
 ```
 
 </div>
 
 ---
 
-## 🌿 Liman nedir?
+## 🌿 İki dünya, tek uygulama
 
-**Liman**, iki dünyayı net biçimde ayıran ama aralarında akıcı geçiş sunan bir günlük uygulamasıdır:
+Üstteki **[ Defter | Liman ]** düğmesiyle iki ayrı dünya arasında akıcı geçiş yaparsın:
 
-> 🔒 **Tamamen mahrem, kilitli iç dünya** — ham, savunmasız duygular için güvenli bir sığınak.
+> 📓 **Psikolog Defteri** *(varsayılan, kilitli)* — profesyonel psikologlar için klinik bir
+> defter. Her **danışan** için ayrı bir dosya: başvuru nedeni, **risk düzeyi**, **durum**,
+> ilk görüşme, **randevular**, **tedavi hedefleri** ve **SOAP** biçiminde seans notları.
+> Tema: **kırmızı / siyah / sepya**, modern bir klinik deri defter.
 >
-> 💚 **Sıcak, yapıcı sosyal ilişki günlüğü** — sevdiklerinle bağını canlı tutan nazik bir hatırlatıcı.
+> 🌅 **Liman** — kişisel iyi oluş günlüğü: ruh hali, günlük, araçlar ve içgörü. Sıcak turuncu
+> *"zindelik"* teması; akşamları ana ekran saate göre **yıldızlı bir gökyüzüne** bürünür. 🌌
 
-Tasarım dili **Material 3 (Material You)**, sıcak **krem yüzeyler**, turuncu *"zindelik"* teması ve sosyal alan için **yeşil aksan** üzerine kuruludur. Akşamları ana ekran, saate göre **yıldızlı bir gökyüzüne** bürünür. 🌌
+Her danışan dosyası: serbest **etiketler/temalar** (örn. *anksiyete · yas*), **risk düzeyi**
+(Yok → Yüksek), **durum** (Aktif / Beklemede / Tamamlandı) ve **kişiye özel renk** ile düzenlenir.
 
 ---
 
@@ -52,23 +57,44 @@ Tasarım dili **Material 3 (Material You)**, sıcak **krem yüzeyler**, turuncu 
 
 ---
 
-## 🆕 Sürüm 1.5.0 yenilikleri
+## 🆕 Sürüm 1.6.0 yenilikleri
 
-- 🎨 **Tüm emojiler ikonlara dönüştü** — ruh hali ve duygusal hava artık tutarlı Material ikonları.
-- 🔒 **Kilit ekranı sıfırdan yeniden tasarlandı** — minimal; parmak izi/yüz tuşu doğrudan tuş takımında.
-- 🖼️ **Profil fotoğrafı** — Ayarlar'dan seç, Bugün avatarında görün.
-- 🔎 **Arama** · 📤 **Veri dışa aktarma** · 📅 **Haftalık rapor** · 🏷️ **Günlük etiketleri** · 💞 **İletişim ritmi**
-- 🧼 İlk açılışta örnek/test verisi yok; sıfırdan senin verinle başlar.
+- 🩺 **Profesyonel psikolog araçları** — danışan dosyaları, **SOAP** seans notları (S/O/A/P + süre),
+  **randevu** planlama, **tedavi hedefleri** (yapılacaklar) ve **risk/durum** takibi.
+- 📊 **Klinik pano** — aktif danışan, bu haftaki randevular, risk takibi, uzun süredir görülmeyenler.
+- ⇄ **İki dünya, üstte geçiş** — Defter (kırmızı/siyah/sepya, kilitli) ⇄ Liman (zindelik).
+- 💾 **Kalıcı veri** — danışanlar/defterler, ruh hali ve günlük artık cihazda **şifreli** saklanıyor;
+  uygulamayı kapatıp açınca **silinmiyor**. *(Daha önce yalnızca bellekteydi.)*
+- 🔐 **Defter kilidi** — tüm klinik defter biyometri/PIN arkasında.
+- 🎞️ **Daha bol animasyon** — dünyaya özel canlı arka plan (Liman: dalga + yıldız; Defter: kıvılcım +
+  parıltı) ve yeni animasyonlu vektör. *"Duygusal hava" kaldırıldı.*
+
+<details><summary>Sürüm 1.5.0</summary>
+
+- Tüm emojiler ikonlara dönüştü, kilit ekranı sıfırdan tasarlandı, profil fotoğrafı, arama,
+  veri dışa aktarma, haftalık rapor, günlük etiketleri, iletişim ritmi.
+
+</details>
 
 ## 🧭 Bilgi mimarisi
 
-Alt navigasyonda **4 sekme** ve her ekranda davranışı değişen **uyarlanabilir bir `+` (FAB)**:
+İki dünya, üstte **[ Defter | Liman ]** geçişi ve her ekranda davranışı değişen **uyarlanabilir `+` (FAB)**:
 
-| Sekme | İçerik | FAB davranışı |
+**📓 Defter dünyası** *(varsayılan, kilitli — profesyonel/klinik)*
+
+| Sekme | İçerik | FAB |
 |:--:|---|---|
-| ☀️ **Bugün** | Karşılama, hızlı ruh hali, iç dünya & bağ özetleri | Hızlı-ekle menüsü |
-| 🔒 **Ben** | Mahrem iç dünya: günlük + araçlar *(kilit rozetli)* | Kalem / günlüğe yaz |
-| 💚 **Bağlar** | İlişki günlüğü *(kilitsiz)* | Kişi ekle *(yeşil)* |
+| 👥 **Danışanlar** | Danışan dosyaları (risk, durum, sonraki randevu) | Danışan ekle |
+| 📖 **Pano** | Bu haftaki randevular, risk takibi, görülmeyenler, seans özeti | — |
+
+> Danışan dosyasında: **SOAP** seans notları, **tedavi hedefleri**, **randevu**, risk/durum, belgeler.
+
+**🌅 Liman dünyası**
+
+| Sekme | İçerik | FAB |
+|:--:|---|---|
+| ☀️ **Bugün** | Karşılama, hızlı ruh hali, kısayollar | Hızlı-ekle |
+| 🔒 **Ben** | Mahrem iç dünya: günlük + araçlar *(kilit rozetli)* | Günlüğe yaz |
 | 📈 **İçgörü** | İstatistik & eğilimler | Paylaş |
 
 > FAB'in ikonu, rengi ve köşe yarıçapı bulunduğun ekrana göre yumuşakça değişir.
@@ -89,11 +115,11 @@ Alt navigasyonda **4 sekme** ve her ekranda davranışı değişen **uyarlanabil
 
 ## 🔐 Kilit & gizlilik stratejisi
 
-- Uygulama **serbest açılır**; **Bağlar** alanı kilitsizdir.
-- Kilit yalnızca **iç dünyaya** (Ben / günlük) girerken devreye girer — böylece ham duygular korunur, günlük kullanım akıcı kalır.
-- İstersen Ayarlar'dan kilidi **"uygulama açılışında"** olacak şekilde değiştirebilirsin.
+- **Psikolog Defteri** birincil dünyadır ve **kilitlidir** — uygulamayı açınca önce defter kilidi gelir.
+- **Liman** (zindelik) dünyası serbest gezilir; kilit yalnızca **iç dünyaya** (Ben / günlük) girerken devreye girer.
 - **Biyometrik + PIN**, ayarlanabilir otomatik kilit (hemen / 1 / 5 / 15 dk).
-- Tüm hassas veri cihazda; günlük içerikleri **uçtan uca (cihaz içi) şifreli**.
+- Tüm hassas veri yalnızca cihazda; defter ve günlük içerikleri **cihaz içinde şifrelenir**
+  (Android Keystore AES/GCM + şifreli yerel depolama).
 
 ---
 
@@ -104,18 +130,20 @@ Alt navigasyonda **4 sekme** ve her ekranda davranışı değişen **uyarlanabil
 ```
 app/src/main/java/com/liman/app/
 ├── data/
-│   ├── crypto/        # CryptoManager — Keystore AES/GCM (günlük şifreleme)
-│   ├── local/         # SettingsStore — DataStore (ayar kalıcılığı)
-│   ├── model/         # Alan modelleri (Mood, Journal, Bonds, Tools, Profile)
-│   └── repository/    # LimanRepository — tek kaynaklı StateFlow deposu
+│   ├── crypto/        # CryptoManager — Keystore AES/GCM şifreleme
+│   ├── local/         # SettingsStore + LimanStore (şifreli kalıcı veri) + Serializers
+│   ├── model/         # Mood, Journal, Bonds (Contact/NotebookEntry/Risk/Goal), Profile
+│   ├── export/        # Düz metin dışa aktarım
+│   └── repository/    # LimanRepository — tek kaynaklı StateFlow + kalıcılık
 └── ui/
-    ├── theme/         # Renkler, tipografi, şekiller, tema (gece paleti dâhil)
-    ├── components/    # Paylaşılan bileşenler + StarrySky (yıldızlı gökyüzü)
-    ├── navigation/    # Rotalar & sekmeler
-    ├── onboarding/ lock/ today/ me/ mood/ bonds/ insight/ settings/ tools/
+    ├── theme/         # Renkler, tipografi, LimanTheme + DefterTheme (kırmızı/siyah/sepya)
+    ├── components/    # Ortak bileşenler + StarrySky + WorldBackground + AnimatedVectors
+    ├── navigation/    # World (Defter/Liman), sekmeler, rotalar
+    ├── bonds/         # BondsScreen, ContactProfile (klinik), AddContact, NoteDetail, DefterSummary
+    ├── onboarding/ lock/ today/ me/ mood/ insight/ search/ report/ calm/ settings/ tools/
     ├── LimanViewModel.kt   # Tek orkestratör ViewModel
     ├── LimanApp.kt         # Kök gezinme grafiği
-    └── MainScaffold.kt     # Alt navigasyon + uyarlanabilir FAB + ambiyans
+    └── MainScaffold.kt     # İki dünyalı kabuk + üst geçiş + uyarlanabilir FAB
 ```
 
 ---
@@ -157,8 +185,10 @@ git push origin v1.0.0   # → GitHub Release + APK
 - [x] Sakinleş (SOS / topraklanma) modu
 - [x] Arama, dışa aktarma, haftalık rapor, günlük etiketleri, iletişim ritmi
 - [x] Zengin metin günlük + sesli not + afiş fotoğraf
-- [ ] Room + SQLCipher ile kalıcı şifreli depolama
-- [ ] Takvim entegrasyonu
+- [x] Profesyonel psikolog araçları (SOAP seans notu, randevu, tedavi hedefi, risk/durum, pano)
+- [x] Cihazda kalıcı + şifreli veri (kişiler/danışanlar, ruh hali, günlük)
+- [ ] Room + SQLCipher ile dosya tabanlı şifreli depolama
+- [ ] Randevu için takvim/bildirim entegrasyonu
 
 ---
 

@@ -22,6 +22,7 @@ import com.liman.app.ui.bonds.AddContactScreen
 import com.liman.app.ui.bonds.ContactProfileScreen
 import com.liman.app.ui.bonds.NoteDetailScreen
 import com.liman.app.ui.calm.CalmScreen
+import com.liman.app.ui.link.mentionRoute
 import com.liman.app.ui.lock.LockReason
 import com.liman.app.ui.lock.LockScreen
 import com.liman.app.ui.theme.DefterTheme
@@ -198,6 +199,7 @@ private fun LimanNavHost(viewModel: LimanViewModel) {
                     contactId = entry.arguments?.getString(Routes.NOTE_CONTACT_ARG).orEmpty(),
                     noteId = entry.arguments?.getString(Routes.NOTE_ARG).orEmpty(),
                     onBack = { navController.popBackStack() },
+                    onOpenMention = { m -> navController.navigate(mentionRoute(m)) },
                 )
             }
         }

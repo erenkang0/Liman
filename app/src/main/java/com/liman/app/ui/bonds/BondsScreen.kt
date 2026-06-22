@@ -40,6 +40,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.liman.app.data.model.Contact
+import com.liman.app.data.model.RiskLevel
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.Avatar
 import com.liman.app.ui.components.LimanCard
@@ -70,9 +71,9 @@ fun BondsScreen(
         item {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Column(Modifier.weight(1f)) {
-                    Text("Defterim", style = MaterialTheme.typography.displaySmall)
+                    Text("Danışanlarım", style = MaterialTheme.typography.displaySmall)
                     Text(
-                        "Hakkında yazdığın kişiler",
+                        "Klinik defterin",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
@@ -108,7 +109,7 @@ fun BondsScreen(
                         QuillIcon(modifier = Modifier.size(40.dp), tint = LocalLimanColors.current.bondAccent)
                         Spacer(Modifier.width(14.dp))
                         Text(
-                            "Henüz kimseyi eklemedin. Sağ alttaki + ile bir kişi ekle; ona özel bir defter açılır.",
+                            "Henüz danışan eklemedin. Sağ alttaki + ile yeni bir danışan dosyası aç.",
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.weight(1f),
@@ -117,7 +118,7 @@ fun BondsScreen(
                 }
             }
         } else {
-            item { SectionHeader("Kişiler", subtitle = "${contacts.size} defter") }
+            item { SectionHeader("Danışanlar", subtitle = "${contacts.size} dosya") }
             items(contacts, key = { it.id }) { contact ->
                 ContactRow(
                     contact = contact,
@@ -175,31 +176,33 @@ private fun ContactRow(
                 Spacer(Modifier.width(14.dp))
                 Column(Modifier.weight(1f)) {
                     Text(contact.name, style = MaterialTheme.typography.titleMedium)
-                    if (contact.title.isNotBlank()) {
-                        Text(
-                            contact.title,
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.primary,
-                        )
-                    }
                     val since = contact.daysSinceContact(today)
                     Text(
                         when {
-                            since == null -> "${contact.relationship.label} · ${contact.entries.size} not"
-                            since == 0L -> "${contact.relationship.label} · bugün"
-                            since == 1L -> "${contact.relationship.label} · dün"
-                            else -> "${contact.relationship.label} · $since gün önce"
+                            since == null -> "${contact.status.label} · ${contact.sessionCount} seans"
+                            since == 0L -> "${contact.status.label} · son seans bugün"
+                            since == 1L -> "${contact.status.label} · son seans dün"
+                            else -> "${contact.status.label} · son seans $since gün önce"
                         },
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
+                    contact.daysUntilNextSession(today)?.let { d ->
+                        if (d >= 0) {
+                            Text(
+                                "Sonraki randevu: " + when (d) { 0L -> "bugün"; 1L -> "yarın"; else -> "$d gün sonra" },
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                            )
+                        }
+                    }
                 }
                 if (editMode) {
                     IconButton(onClick = onDelete) {
                         Icon(Icons.Rounded.Delete, contentDescription = "Sil", tint = MaterialTheme.colorScheme.error)
                     }
                 } else {
-                    ClosenessDots(contact.closeness)
+                    RiskDot(contact.risk)
                 }
             }
             if (contact.tags.isNotEmpty()) {
@@ -221,20 +224,19 @@ private fun ContactRow(
     }
 }
 
-/** Yakınlık/önem seviyesi — 5 nokta. */
+/** Klinik risk göstergesi — renkli nokta. */
 @Composable
-private fun ClosenessDots(level: Int) {
-    Row(horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-        repeat(5) { i ->
-            Box(
-                Modifier
-                    .size(7.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (i < level) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.surfaceContainerHighest
-                    ),
-            )
-        }
+private fun RiskDot(risk: RiskLevel) {
+    if (risk == RiskLevel.NONE) return
+    val color = when (risk) {
+        RiskLevel.LOW -> MaterialTheme.colorScheme.secondary
+        RiskLevel.MEDIUM -> MaterialTheme.colorScheme.tertiary
+        RiskLevel.HIGH -> MaterialTheme.colorScheme.error
+        RiskLevel.NONE -> MaterialTheme.colorScheme.surfaceContainerHighest
+    }
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(Modifier.size(10.dp).clip(CircleShape).background(color))
+        Spacer(Modifier.width(6.dp))
+        Text(risk.label, style = MaterialTheme.typography.labelSmall, color = color)
     }
 }

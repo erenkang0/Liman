@@ -34,13 +34,17 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.liman.app.data.model.EntryKind
+import com.liman.app.data.model.Mention
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.FullscreenPhotoViewer
+import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.components.PhotoThumbStrip
 import com.liman.app.ui.components.SectionHeader
 import com.liman.app.ui.components.VoiceNotePlayer
 import com.liman.app.ui.components.moodIcon
+import com.liman.app.ui.link.MentionText
 import com.liman.app.ui.theme.JournalBodyStyle
 import com.liman.app.ui.theme.LocalLimanColors
 import java.time.format.DateTimeFormatter
@@ -54,17 +58,20 @@ fun NoteDetailScreen(
     contactId: String,
     noteId: String,
     onBack: () -> Unit,
+    onOpenMention: (Mention) -> Unit = {},
 ) {
     val contacts by viewModel.repository.contacts.collectAsStateWithLifecycle()
     val contact = contacts.firstOrNull { it.id == contactId }
     val entry = contact?.entries?.firstOrNull { it.id == noteId }
     var viewerIndex by remember { mutableStateOf<Int?>(null) }
 
+    val isSession = entry?.kind == EntryKind.SESSION
+
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text(entry?.title?.ifBlank { "Not" } ?: "Not") },
+                title = { Text(if (isSession) "Seans notu" else entry?.title?.ifBlank { "Not" } ?: "Not") },
                 navigationIcon = { BackButton(onBack) },
                 actions = {
                     if (entry != null) {
@@ -82,7 +89,7 @@ fun NoteDetailScreen(
     ) { padding ->
         if (entry == null) {
             Box(Modifier.padding(padding).fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
-                Text("Not bulunamadı.")
+                Text("Kayıt bulunamadı.")
             }
             return@Scaffold
         }
@@ -110,24 +117,18 @@ fun NoteDetailScreen(
             }
 
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    entry.date.format(noteDate),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.weight(1f),
-                )
+                Column(Modifier.weight(1f)) {
+                    Text(entry.date.format(noteDate), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    entry.durationMin?.let { Text("Süre: $it dk", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) }
+                }
                 entry.feeling?.let {
-                    Icon(
-                        moodIcon(it),
-                        contentDescription = it.label,
-                        tint = LocalLimanColors.current.moodColor(it.score),
-                        modifier = Modifier.size(22.dp),
-                    )
+                    Icon(moodIcon(it), contentDescription = it.label, tint = LocalLimanColors.current.moodColor(it.score), modifier = Modifier.size(22.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(it.label, style = MaterialTheme.typography.labelMedium)
                 }
             }
-            if (entry.title.isNotBlank()) {
+
+            if (!isSession && entry.title.isNotBlank()) {
                 Text(entry.title, style = MaterialTheme.typography.headlineSmall)
             }
 
@@ -135,12 +136,17 @@ fun NoteDetailScreen(
                 VoiceNotePlayer(voice.path, voice.durationMs, Modifier.fillMaxWidth())
             }
 
-            if (entry.text.isNotBlank()) {
-                Text(entry.text, style = JournalBodyStyle)
+            if (isSession) {
+                SoapBlock("S — Danışanın aktardıkları", entry.subjective, entry.mentions, onOpenMention)
+                SoapBlock("O — Gözlemler", entry.objective, entry.mentions, onOpenMention)
+                SoapBlock("A — Değerlendirme", entry.assessment, entry.mentions, onOpenMention)
+                SoapBlock("P — Plan / ödev", entry.plan, entry.mentions, onOpenMention)
+            } else if (entry.text.isNotBlank()) {
+                MentionText(entry.text, entry.mentions, onOpenMention, style = JournalBodyStyle)
             }
 
             if (entry.photos.size > 1) {
-                SectionHeader("Fotoğraflar", subtitle = "${entry.photos.size}")
+                SectionHeader("Belgeler", subtitle = "${entry.photos.size}")
                 PhotoThumbStrip(entry.photos, onClick = { viewerIndex = it })
             }
         }
@@ -152,5 +158,16 @@ fun NoteDetailScreen(
             startIndex = idx,
             onClose = { viewerIndex = null },
         )
+    }
+}
+
+@Composable
+private fun SoapBlock(label: String, content: String, mentions: List<Mention>, onOpenMention: (Mention) -> Unit) {
+    if (content.isBlank()) return
+    LimanCard(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(label, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+            MentionText(content, mentions, onOpenMention, style = JournalBodyStyle)
+        }
     }
 }

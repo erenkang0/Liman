@@ -69,9 +69,9 @@ enum class Tab(
     val icon: ImageVector,
     val showLockBadge: Boolean = false,
 ) {
-    // Defter dünyası
-    PEOPLE(World.DEFTER, "Kişiler", Icons.Rounded.Groups, Icons.Outlined.Groups),
-    SUMMARY(World.DEFTER, "Özet", Icons.Rounded.AutoStories, Icons.Outlined.AutoStories),
+    // Defter dünyası (klinik)
+    PEOPLE(World.DEFTER, "Danışanlar", Icons.Rounded.Groups, Icons.Outlined.Groups),
+    SUMMARY(World.DEFTER, "Pano", Icons.Rounded.AutoStories, Icons.Outlined.AutoStories),
 
     // Liman dünyası
     TODAY(World.LIMAN, "Bugün", Icons.Rounded.WbSunny, Icons.Outlined.WbSunny),

@@ -48,7 +48,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
-import com.liman.app.data.model.RelationshipType
+import com.liman.app.data.model.ClientStatus
+import com.liman.app.data.model.RiskLevel
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
 import java.time.Instant
@@ -67,11 +68,11 @@ fun AddContactScreen(
     onSaved: (String) -> Unit,
 ) {
     var name by remember { mutableStateOf("") }
-    var title by remember { mutableStateOf("") }
-    var relationship by remember { mutableStateOf(RelationshipType.FRIEND) }
-    var closeness by remember { mutableStateOf(3) }
+    var presenting by remember { mutableStateOf("") }
+    var risk by remember { mutableStateOf(RiskLevel.NONE) }
+    var status by remember { mutableStateOf(ClientStatus.ACTIVE) }
     var accent by remember { mutableStateOf<Color?>(null) }
-    var birthday by remember { mutableStateOf<LocalDate?>(null) }
+    var intake by remember { mutableStateOf<LocalDate?>(LocalDate.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
     val tags = remember { mutableListOf<String>().toMutableStateList() }
     var tagDraft by remember { mutableStateOf("") }
@@ -80,7 +81,7 @@ fun AddContactScreen(
         containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
-                title = { Text("Kişi ekle") },
+                title = { Text("Yeni danışan") },
                 navigationIcon = { BackButton(onBack) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
@@ -99,90 +100,50 @@ fun AddContactScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("İsim") },
+                label = { Text("Ad / Danışan adı") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
 
             OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                label = { Text("Başlık (örn. \"en iyi arkadaşım\")") },
-                singleLine = true,
+                value = presenting,
+                onValueChange = { presenting = it },
+                label = { Text("Başvuru nedeni / ön görüşme notu") },
                 modifier = Modifier.fillMaxWidth(),
             )
 
             Column {
-                Text("İlişki", style = MaterialTheme.typography.titleSmall)
+                Text("Risk düzeyi", style = MaterialTheme.typography.titleSmall)
                 Spacer(Modifier.height(8.dp))
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    RelationshipType.entries.forEach { type ->
-                        FilterChip(
-                            selected = relationship == type,
-                            onClick = { relationship = type },
-                            label = { Text(type.label) },
-                        )
+                    RiskLevel.entries.forEach { r ->
+                        FilterChip(selected = risk == r, onClick = { risk = r }, label = { Text(r.label) })
                     }
                 }
             }
 
             Column {
-                Text("Yakınlık / önem", style = MaterialTheme.typography.titleSmall)
+                Text("Durum", style = MaterialTheme.typography.titleSmall)
                 Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    (1..5).forEach { level ->
-                        val on = level <= closeness
-                        Box(
-                            Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    if (on) MaterialTheme.colorScheme.primary
-                                    else MaterialTheme.colorScheme.surfaceContainerHighest
-                                )
-                                .clickable { closeness = level },
-                            contentAlignment = Alignment.Center,
-                        ) {
-                            Text(
-                                "$level",
-                                color = if (on) MaterialTheme.colorScheme.onPrimary
-                                else MaterialTheme.colorScheme.onSurfaceVariant,
-                                style = MaterialTheme.typography.labelMedium,
-                            )
-                        }
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ClientStatus.entries.forEach { s ->
+                        FilterChip(selected = status == s, onClick = { status = s }, label = { Text(s.label) })
                     }
                 }
             }
 
-            Column {
-                Text("Renk", style = MaterialTheme.typography.titleSmall)
-                Spacer(Modifier.height(8.dp))
-                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                    accentChoices.forEach { c ->
-                        val selected = accent == c
-                        Box(
-                            Modifier
-                                .size(34.dp)
-                                .clip(CircleShape)
-                                .background(c)
-                                .then(
-                                    if (selected) Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
-                                    else Modifier
-                                )
-                                .clickable { accent = if (selected) null else c },
-                        )
-                    }
-                }
+            OutlinedButton(onClick = { showDatePicker = true }, modifier = Modifier.fillMaxWidth()) {
+                Text(intake?.let { "İlk görüşme: $it" } ?: "İlk görüşme tarihi seç")
             }
 
             Column {
-                Text("Etiketler", style = MaterialTheme.typography.titleSmall)
+                Text("Temalar / etiketler", style = MaterialTheme.typography.titleSmall)
                 Spacer(Modifier.height(8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     OutlinedTextField(
                         value = tagDraft,
                         onValueChange = { tagDraft = it },
-                        label = { Text("örn. huzur, sıkıntı") },
+                        label = { Text("örn. anksiyete, yas, ilişki") },
                         singleLine = true,
                         modifier = Modifier.weight(1f),
                     )
@@ -210,8 +171,25 @@ fun AddContactScreen(
                 }
             }
 
-            OutlinedButton(onClick = { showDatePicker = true }, modifier = Modifier.fillMaxWidth()) {
-                Text(birthday?.let { "Doğum günü: $it" } ?: "Doğum günü seç (opsiyonel)")
+            Column {
+                Text("Renk", style = MaterialTheme.typography.titleSmall)
+                Spacer(Modifier.height(8.dp))
+                Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    accentChoices.forEach { c ->
+                        val selected = accent == c
+                        Box(
+                            Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(c)
+                                .then(
+                                    if (selected) Modifier.border(3.dp, MaterialTheme.colorScheme.onSurface, CircleShape)
+                                    else Modifier
+                                )
+                                .clickable { accent = if (selected) null else c },
+                        )
+                    }
+                }
             }
 
             Button(
@@ -219,11 +197,11 @@ fun AddContactScreen(
                     if (name.isNotBlank()) {
                         val id = viewModel.repository.addContact(
                             name = name.trim(),
-                            title = title.trim(),
-                            relationship = relationship,
-                            birthday = birthday,
+                            bio = presenting.trim(),
                             tags = tags.toList(),
-                            closeness = closeness,
+                            risk = risk,
+                            status = status,
+                            intakeDate = intake,
                             accentColorArgb = accent?.toArgb(),
                         )
                         onSaved(id)
@@ -234,7 +212,7 @@ fun AddContactScreen(
             ) {
                 Icon(Icons.Rounded.Check, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.size(8.dp))
-                Text("Kaydet ve defterini aç")
+                Text("Danışan dosyasını oluştur")
             }
             Spacer(Modifier.height(24.dp))
         }
@@ -247,7 +225,7 @@ fun AddContactScreen(
             confirmButton = {
                 TextButton(onClick = {
                     state.selectedDateMillis?.let {
-                        birthday = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
+                        intake = Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).toLocalDate()
                     }
                     showDatePicker = false
                 }) { Text("Tamam") }

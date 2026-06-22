@@ -3,9 +3,11 @@ package com.liman.app.data.repository
 import com.liman.app.data.crypto.CryptoManager
 import com.liman.app.data.local.LimanStore
 import com.liman.app.data.model.Contact
+import com.liman.app.data.model.EntryKind
 import com.liman.app.data.model.GratitudeEntry
 import com.liman.app.data.model.JournalEntry
 import com.liman.app.data.model.JournalFont
+import com.liman.app.data.model.Mention
 import com.liman.app.data.model.NotebookEntry
 import com.liman.app.data.model.StyleSpan
 import com.liman.app.data.model.VoiceNote
@@ -13,9 +15,12 @@ import com.liman.app.data.model.MoodEntry
 import com.liman.app.data.model.MoodFace
 import com.liman.app.data.model.MoodIntensity
 import com.liman.app.data.model.MoodTrigger
+import com.liman.app.data.model.ClientStatus
 import com.liman.app.data.model.RelationshipType
+import com.liman.app.data.model.RiskLevel
 import com.liman.app.data.model.ThoughtRecord
 import com.liman.app.data.model.TimeCapsule
+import com.liman.app.data.model.TreatmentGoal
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -119,14 +124,18 @@ class LimanRepository(
         persist()
     }
 
-    /** Yeni kişi ekler ve oluşturulan kişinin id'sini döndürür. */
+    /** Yeni danışan/kişi ekler ve oluşturulan kaydın id'sini döndürür. */
     fun addContact(
         name: String,
         title: String = "",
+        bio: String = "",
         relationship: RelationshipType = RelationshipType.FRIEND,
         birthday: LocalDate? = null,
         tags: List<String> = emptyList(),
         closeness: Int = 3,
+        risk: RiskLevel = RiskLevel.NONE,
+        status: ClientStatus = ClientStatus.ACTIVE,
+        intakeDate: LocalDate? = null,
         accentColorArgb: Int? = null,
     ): String {
         val id = newId()
@@ -135,12 +144,16 @@ class LimanRepository(
                 id = id,
                 name = name,
                 title = title,
+                bio = bio,
                 relationship = relationship,
                 birthday = birthday,
                 tags = tags,
                 closeness = closeness,
+                risk = risk,
+                status = status,
+                intakeDate = intakeDate,
                 accentColorArgb = accentColorArgb,
-                lastContact = LocalDate.now(),
+                lastContact = null,
             )
         )
         return id
@@ -156,27 +169,69 @@ class LimanRepository(
         persist()
     }
 
-    /** Kişinin defterine yeni bir kayıt (gözlem/not/anı) ekler. */
+    /** Kişinin defterine yeni bir kayıt (serbest not ya da yapılandırılmış seans) ekler. */
     fun addEntry(
         contactId: String,
+        kind: EntryKind = EntryKind.NOTE,
         title: String = "",
         text: String = "",
+        subjective: String = "",
+        objective: String = "",
+        assessment: String = "",
+        plan: String = "",
+        durationMin: Int? = null,
         feeling: MoodFace? = null,
         photos: List<String> = emptyList(),
         voice: VoiceNote? = null,
         tags: List<String> = emptyList(),
+        mentions: List<Mention> = emptyList(),
     ) {
         val entry = NotebookEntry(
             id = newId(),
+            kind = kind,
             title = title,
             text = text,
+            subjective = subjective,
+            objective = objective,
+            assessment = assessment,
+            plan = plan,
+            durationMin = durationMin,
             feeling = feeling,
             photos = photos.take(5),
             voice = voice,
             tags = tags,
+            mentions = mentions,
         )
         _contacts.update { list ->
             list.map { if (it.id == contactId) it.copy(entries = listOf(entry) + it.entries) else it }
+        }
+        persist()
+    }
+
+    /* ----------------------- Tedavi planı hedefleri --------------------- */
+    fun addGoal(contactId: String, text: String) {
+        val goal = TreatmentGoal(id = newId(), text = text)
+        _contacts.update { list ->
+            list.map { if (it.id == contactId) it.copy(goals = it.goals + goal) else it }
+        }
+        persist()
+    }
+
+    fun toggleGoal(contactId: String, goalId: String) {
+        _contacts.update { list ->
+            list.map { c ->
+                if (c.id != contactId) c
+                else c.copy(goals = c.goals.map { if (it.id == goalId) it.copy(done = !it.done) else it })
+            }
+        }
+        persist()
+    }
+
+    fun deleteGoal(contactId: String, goalId: String) {
+        _contacts.update { list ->
+            list.map { c ->
+                if (c.id != contactId) c else c.copy(goals = c.goals.filterNot { it.id == goalId })
+            }
         }
         persist()
     }

@@ -18,6 +18,56 @@ enum class RelationshipType(val label: String) {
     OTHER("Diğer"),
 }
 
+/** Danışanın klinik risk düzeyi. */
+@Serializable
+enum class RiskLevel(val label: String) {
+    NONE("Risk yok"),
+    LOW("Düşük"),
+    MEDIUM("Orta"),
+    HIGH("Yüksek"),
+}
+
+/** Danışan dosyasının durumu. */
+@Serializable
+enum class ClientStatus(val label: String) {
+    ACTIVE("Aktif"),
+    PAUSED("Beklemede"),
+    COMPLETED("Tamamlandı"),
+}
+
+/** Defter kaydının türü: serbest not ya da yapılandırılmış seans (SOAP). */
+@Serializable
+enum class EntryKind(val label: String) {
+    NOTE("Not"),
+    SESSION("Seans"),
+}
+
+/** @bağlantı hedef türü — iki uygulamayı (Defter/Liman) birbirine bağlar. */
+@Serializable
+enum class MentionType { CONTACT, NOTE, JOURNAL }
+
+/**
+ * Metin içinde "@..." ile kurulan, başka bir kayda işaret eden bağlantı.
+ * [label] @ ile gösterilen ad; tıklanınca ilgili kayda gidilir.
+ */
+@Serializable
+data class Mention(
+    val type: MentionType,
+    /** Hedef id (CONTACT: kişi id, JOURNAL: günlük id, NOTE: defter kaydı id). */
+    val id: String,
+    /** NOTE için kaydın ait olduğu kişi id'si. */
+    val contactId: String = "",
+    val label: String,
+)
+
+/** Tedavi planı hedefi. */
+@Serializable
+data class TreatmentGoal(
+    val id: String,
+    val text: String,
+    val done: Boolean = false,
+)
+
 /**
  * Kişiye özel defterdeki tek bir kayıt — o kişi hakkında belirli bir günde
  * yazdığın görüş/gözlem/anı. Metin esastır; foto/ses/his opsiyoneldir.
@@ -25,23 +75,34 @@ enum class RelationshipType(val label: String) {
 @Serializable
 data class NotebookEntry(
     val id: String,
+    val kind: EntryKind = EntryKind.NOTE,
     val title: String = "",
     val text: String = "",
-    /** O an o kişiye/duruma dair hissin (opsiyonel). */
+    /** Yapılandırılmış seans notu (SOAP). Yalnızca [kind] == SESSION iken kullanılır. */
+    val subjective: String = "",   // S — Danışanın aktardıkları
+    val objective: String = "",    // O — Gözlemlerin
+    val assessment: String = "",   // A — Değerlendirme / formülasyon
+    val plan: String = "",         // P — Plan / ödev
+    val durationMin: Int? = null,  // Seans süresi (dk)
+    /** O an o kişiye/duruma dair hissin/danışanın ruh hali (opsiyonel). */
     val feeling: MoodFace? = null,
     val date: LocalDate = LocalDate.now(),
     /** Yerel fotoğraf URI'leri (en fazla 5). İlk fotoğraf kapak olur. */
     val photos: List<String> = emptyList(),
     val voice: VoiceNote? = null,
     val tags: List<String> = emptyList(),
+    /** Metin içindeki "@" bağlantıları (diğer kayıtlara). */
+    val mentions: List<Mention> = emptyList(),
 ) {
     val coverPhoto: String? get() = photos.firstOrNull()
 
     /** Liste önizlemesi için kısa özet. */
     val preview: String
-        get() = text.replace("\n", " ").trim().let {
-            if (it.length > 120) it.take(120).trimEnd() + "…" else it
-        }
+        get() = listOf(text, subjective, assessment, plan, objective)
+            .firstOrNull { it.isNotBlank() }.orEmpty()
+            .replace("\n", " ").trim().let {
+                if (it.length > 120) it.take(120).trimEnd() + "…" else it
+            }
 }
 
 @Serializable
@@ -51,11 +112,21 @@ data class Contact(
     /** Senin verdiğin serbest başlık (örn. "en iyi arkadaşım"). Öne çıkar. */
     val title: String = "",
     val relationship: RelationshipType = RelationshipType.FRIEND,
+    /** Başvuru nedeni / kısa klinik not. */
     val bio: String = "",
-    /** Serbest etiketler (örn. "huzur", "sıkıntı", "mesafe"). */
+    /** Serbest etiketler / temalar (örn. "anksiyete", "yas", "ilişki"). */
     val tags: List<String> = emptyList(),
     /** Yakınlık/önem (1..5). */
     val closeness: Int = 3,
+    /* ----- Profesyonel (klinik) alanlar ----- */
+    val risk: RiskLevel = RiskLevel.NONE,
+    val status: ClientStatus = ClientStatus.ACTIVE,
+    /** İlk görüşme / dosya açılış tarihi. */
+    val intakeDate: LocalDate? = null,
+    /** Planlanan sonraki seans. */
+    val nextSession: LocalDate? = null,
+    /** Tedavi planı hedefleri. */
+    val goals: List<TreatmentGoal> = emptyList(),
     /** Kişiye özel aksan rengi (ARGB). null = avatarSeed'den türetilir. */
     val accentColorArgb: Int? = null,
     val birthday: LocalDate? = null,
@@ -100,4 +171,13 @@ data class Contact(
         val over = since - cadence
         return if (over > 0) over else null
     }
+
+    /** Sonraki seansa kalan gün (geçmişse negatif). null = randevu yok. */
+    fun daysUntilNextSession(today: LocalDate = LocalDate.now()): Long? {
+        val n = nextSession ?: return null
+        return ChronoUnit.DAYS.between(today, n)
+    }
+
+    /** Toplam seans (yapılandırılmış) kaydı sayısı. */
+    val sessionCount: Int get() = entries.count { it.kind == EntryKind.SESSION }
 }
