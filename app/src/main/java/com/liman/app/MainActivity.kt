@@ -6,12 +6,16 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.fragment.app.FragmentActivity
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.liman.app.data.model.ThemeMode
 import com.liman.app.ui.LimanApp
 import com.liman.app.ui.LimanViewModel
+import com.liman.app.ui.copy.LocalCopy
+import com.liman.app.ui.copy.copyFor
 import com.liman.app.ui.theme.LimanTheme
 
 class MainActivity : FragmentActivity() {
@@ -33,8 +37,11 @@ class MainActivity : FragmentActivity() {
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
             }
+            val copy = remember(settings.profile.gender) { copyFor(settings.profile.gender) }
             LimanTheme(darkTheme = dark, dynamicColor = settings.dynamicColor) {
-                LimanApp(viewModel)
+                CompositionLocalProvider(LocalCopy provides copy) {
+                    LimanApp(viewModel)
+                }
             }
         }
     }

@@ -41,6 +41,9 @@ Tasarım dili **Material 3 (Material You)**, sıcak **krem yüzeyler**, turuncu 
 |---|---|
 | 🎨 **Material You** | Dinamik renk, açık/koyu tema, sistem temasını izler |
 | 🌅 **Saate duyarlı ambiyans** | Akşam & gece elemanların ardında nazikçe parıldayan yıldızlar + koyu mavi gökyüzü |
+| 🗣️ **Cinsiyete duyarlı ton** | Çok nazik dil bazılarına fazla gelebiliyor; "Erkek" seçildiğinde daha sade, yere basan bir üslup |
+| 🆘 **Sakinleş (SOS)** | Bunaldığında 5-4-3-2-1 topraklanma, nefes kısayolu ve hızlı destek |
+| 🔔 **Bildirimli hatırlatıcılar** | WorkManager ile günlük nazik hatırlatmalar; izin başlangıçta sorulur |
 | 🔐 **Akıllı gizlilik** | Kilit yalnızca iç dünyaya (Ben) girerken devreye girer — günlük kullanım sürtünmesiz |
 | 👆 **Biyometrik + PIN** | Parmak izi / yüz tanıma ve 4 haneli PIN; ayarlanabilir otomatik kilit |
 | 🔏 **Cihazda şifreleme** | Günlük içerikleri Android Keystore (AES/GCM) ile cihaz içinde şifrelenir |
@@ -141,8 +144,10 @@ git push origin v1.0.0   # → GitHub Release + APK
 
 ## 🗺️ Yol haritası
 
+- [x] Gerçek bildirim planlaması (WorkManager) + başlangıçta izin
+- [x] Cinsiyete duyarlı yazı tonu
+- [x] Sakinleş (SOS / topraklanma) modu
 - [ ] Room + SQLCipher ile kalıcı şifreli depolama
-- [ ] Gerçek bildirim planlaması (WorkManager)
 - [ ] Google Fotoğraflar ve takvim entegrasyonu
 - [ ] Yedekleme / dışa aktarma
 

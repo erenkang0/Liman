@@ -38,6 +38,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.liman.app.data.model.AppSettings
 import com.liman.app.ui.components.bounceClick
+import com.liman.app.ui.copy.LocalCopy
 
 enum class LockReason(val title: String, val subtitle: String) {
     APP_OPEN("Liman kilitli", "Devam etmek için kimliğini doğrula"),
@@ -61,6 +62,9 @@ fun LockScreen(
 
     var pin by remember { mutableStateOf("") }
     var error by remember { mutableStateOf(false) }
+
+    val subtitle = if (reason == LockReason.INNER_WORLD) LocalCopy.current.lockInnerSubtitle
+    else reason.subtitle
 
     fun tryBiometric() {
         if (bioAvailable && activity != null) promptBiometric(activity, onSuccess = onUnlock)
@@ -95,7 +99,7 @@ fun LockScreen(
         Text(reason.title, style = MaterialTheme.typography.headlineMedium, textAlign = TextAlign.Center)
         Spacer(Modifier.height(8.dp))
         Text(
-            reason.subtitle,
+            subtitle,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,

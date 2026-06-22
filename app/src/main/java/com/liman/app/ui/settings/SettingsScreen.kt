@@ -41,12 +41,14 @@ import com.liman.app.data.model.ThemeMode
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.LimanCard
+import com.liman.app.ui.copy.LocalCopy
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(
     viewModel: LimanViewModel,
     onBack: () -> Unit,
+    onOpenReminders: () -> Unit = {},
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     var showPinDialog by remember { mutableStateOf(false) }
@@ -159,7 +161,7 @@ fun SettingsScreen(
             // Bildirimler
             SettingsGroup("Bildirimler") {
                 Text(
-                    "Tek bir saat yok — her bildirimin kendi ayarı var. Hiçbir şey yazmazsan seni yargılamayız.",
+                    LocalCopy.current.notificationsNote,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -179,6 +181,7 @@ fun SettingsScreen(
                 SwitchRow("Sessiz saatler", "${notifications.quietFrom} – ${notifications.quietTo}", notifications.quietHoursEnabled) {
                     notifications = notifications.copy(quietHoursEnabled = it)
                 }
+                NavRow("Bildirim hatırlatıcıları → planla & test et") { onOpenReminders() }
             }
 
             // Görünüm

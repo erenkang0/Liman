@@ -1,6 +1,10 @@
 package com.liman.app.ui
 
+import android.Manifest
 import android.content.Intent
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.Crossfade
@@ -25,6 +29,7 @@ import androidx.compose.material.icons.rounded.Mood
 import androidx.compose.material.icons.rounded.PersonAdd
 import androidx.compose.material.icons.rounded.SelfImprovement
 import androidx.compose.material.icons.rounded.Share
+import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
@@ -39,6 +44,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -54,6 +60,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.liman.app.data.model.LockLocation
+import com.liman.app.data.notifications.LimanNotifications
 import com.liman.app.ui.bonds.BondsScreen
 import com.liman.app.ui.components.LockBadge
 import com.liman.app.ui.components.StarrySky
@@ -100,6 +107,18 @@ fun MainScaffold(
     val limanColors = LocalLimanColors.current
     val scheme = MaterialTheme.colorScheme
     val timeOfDay = remember { currentTimeOfDay() }
+
+    // Başlangıçta bildirim izni iste (Android 13+).
+    val notificationPermission = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission(),
+    ) { /* sonucu sessizce karşıla; kullanıcı reddedebilir */ }
+    LaunchedEffect(Unit) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            !LimanNotifications.hasPermission(context)
+        ) {
+            notificationPermission.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
+    }
 
     fun openJournalOrUnlock() {
         if (unlocked || !settings.lockEnabled) rootNavController.navigate(Routes.JOURNAL_EDITOR)
@@ -219,6 +238,7 @@ fun MainScaffold(
                         onOpenBonds = { selectedTab = Tab.BONDS },
                         onOpenTool = { rootNavController.navigate(it) },
                         onOpenContact = { rootNavController.navigate(Routes.contact(it)) },
+                        onOpenCalm = { rootNavController.navigate(Routes.CALM) },
                     )
 
                     Tab.ME -> if (innerWorldLocked) {
@@ -277,6 +297,9 @@ fun MainScaffold(
                 }
                 QuickAddRow(Icons.Rounded.SelfImprovement, "Nefes egzersizi", "Bir an dur, nefes al") {
                     dismiss(); rootNavController.navigate(Routes.TOOL_BREATHING)
+                }
+                QuickAddRow(Icons.Rounded.Spa, "Sakinleş", "Bunaldıysan hızlı destek") {
+                    dismiss(); rootNavController.navigate(Routes.CALM)
                 }
             }
         }

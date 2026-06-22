@@ -24,6 +24,7 @@ import androidx.compose.material.icons.rounded.PhotoLibrary
 import androidx.compose.material.icons.rounded.Psychology
 import androidx.compose.material.icons.rounded.Schedule
 import androidx.compose.material.icons.rounded.SelfImprovement
+import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.VolunteerActivism
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,6 +51,7 @@ import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.components.SectionHeader
 import com.liman.app.ui.components.bounceClick
 import com.liman.app.ui.components.screenPadding
+import com.liman.app.ui.copy.LocalCopy
 import com.liman.app.ui.navigation.Routes
 import com.liman.app.ui.theme.JournalBodyStyle
 import com.liman.app.ui.theme.LocalLimanColors
@@ -64,6 +66,7 @@ private val tools = listOf(
     ToolItem("Şükran", Icons.Rounded.VolunteerActivism, Routes.TOOL_GRATITUDE),
     ToolItem("Kapsül", Icons.Rounded.Schedule, Routes.TOOL_CAPSULE),
     ToolItem("Takvim", Icons.Rounded.CalendarMonth, Routes.TOOL_CALENDAR),
+    ToolItem("Sakinleş", Icons.Rounded.Spa, Routes.CALM),
 )
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,6 +77,7 @@ fun MeScreen(
     onOpenTool: (String) -> Unit,
 ) {
     val journals by viewModel.repository.journals.collectAsStateWithLifecycle()
+    val copy = LocalCopy.current
     var reading by remember { mutableStateOf<JournalEntry?>(null) }
 
     Column(
@@ -100,7 +104,7 @@ fun MeScreen(
                     Text("Bugüne yaz", style = MaterialTheme.typography.titleLarge)
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        "Aklından geçeni, olduğu gibi. Burası yalnızca senin.",
+                        copy.meWriteDesc,
                         style = MaterialTheme.typography.bodyMedium,
                     )
                 }
@@ -115,7 +119,7 @@ fun MeScreen(
         }
 
         // Araç şeridi
-        SectionHeader("Araçlar", subtitle = "Kendine bakım için küçük duraklar")
+        SectionHeader("Araçlar", subtitle = copy.toolsSubtitle)
         Row(
             Modifier
                 .fillMaxWidth()
@@ -132,7 +136,7 @@ fun MeScreen(
         if (journals.isEmpty()) {
             LimanCard(Modifier.fillMaxWidth()) {
                 Text(
-                    "Henüz bir şey yazmadın — ve bu tamamen senin tempon. Hazır olduğunda buradayız.",
+                    copy.meEmptyJournals,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(18.dp),

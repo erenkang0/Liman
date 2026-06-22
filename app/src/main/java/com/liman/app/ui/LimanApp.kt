@@ -16,12 +16,14 @@ import androidx.navigation.navArgument
 import com.liman.app.data.model.LockLocation
 import com.liman.app.ui.bonds.AddContactScreen
 import com.liman.app.ui.bonds.ContactProfileScreen
+import com.liman.app.ui.calm.CalmScreen
 import com.liman.app.ui.lock.LockReason
 import com.liman.app.ui.lock.LockScreen
 import com.liman.app.ui.me.JournalEditorScreen
 import com.liman.app.ui.mood.MoodEntryScreen
 import com.liman.app.ui.navigation.Routes
 import com.liman.app.ui.onboarding.OnboardingScreen
+import com.liman.app.ui.settings.RemindersScreen
 import com.liman.app.ui.settings.SettingsScreen
 import com.liman.app.ui.tools.BreathingScreen
 import com.liman.app.ui.tools.GratitudeScreen
@@ -77,7 +79,23 @@ private fun LimanNavHost(viewModel: LimanViewModel) {
         }
 
         composable(Routes.SETTINGS) {
-            SettingsScreen(viewModel = viewModel, onBack = { navController.popBackStack() })
+            SettingsScreen(
+                viewModel = viewModel,
+                onBack = { navController.popBackStack() },
+                onOpenReminders = { navController.navigate(Routes.REMINDERS) },
+            )
+        }
+
+        composable(Routes.REMINDERS) {
+            RemindersScreen(onBack = { navController.popBackStack() })
+        }
+
+        composable(Routes.CALM) {
+            CalmScreen(
+                onBack = { navController.popBackStack() },
+                onOpenBreathing = { navController.navigate(Routes.TOOL_BREATHING) },
+                onOpenBonds = { navController.popBackStack() },
+            )
         }
 
         composable(Routes.MOOD_ENTRY) {

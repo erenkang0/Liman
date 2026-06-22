@@ -34,6 +34,7 @@ import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.LimanCard
 import com.liman.app.ui.components.SectionHeader
+import com.liman.app.ui.copy.LocalCopy
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
@@ -50,6 +51,7 @@ fun GratitudeScreen(
     onBack: () -> Unit,
 ) {
     val entries by viewModel.repository.gratitude.collectAsStateWithLifecycle()
+    val copy = LocalCopy.current
     var first by remember { mutableStateOf("") }
     var second by remember { mutableStateOf("") }
     var third by remember { mutableStateOf("") }
@@ -75,7 +77,7 @@ fun GratitudeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             Text(
-                "Seri yok, baskı yok. Sadece bugün fark ettiğin küçük güzellikler.",
+                copy.gratitudeIntro,
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),
@@ -99,7 +101,7 @@ fun GratitudeScreen(
             SectionHeader("Şükran duvarı", subtitle = "${entries.size} an")
             if (entries.isEmpty()) {
                 Text(
-                    "Henüz bir şey eklemedin. Acelesi yok. 🌿",
+                    copy.gratitudeEmpty,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

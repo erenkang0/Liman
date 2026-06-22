@@ -22,6 +22,7 @@ import androidx.compose.material.icons.rounded.CalendarMonth
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.LocalFireDepartment
 import androidx.compose.material.icons.rounded.SelfImprovement
+import androidx.compose.material.icons.rounded.Spa
 import androidx.compose.material.icons.rounded.WavingHand
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -47,6 +48,7 @@ import com.liman.app.ui.components.MoodFaceRow
 import com.liman.app.ui.components.SectionHeader
 import com.liman.app.ui.components.bounceClick
 import com.liman.app.ui.components.screenPadding
+import com.liman.app.ui.copy.LocalCopy
 import com.liman.app.ui.insight.journalStreak
 import com.liman.app.ui.navigation.Routes
 import com.liman.app.ui.theme.LocalLimanColors
@@ -64,11 +66,13 @@ fun TodayScreen(
     onOpenBonds: () -> Unit,
     onOpenTool: (String) -> Unit,
     onOpenContact: (String) -> Unit,
+    onOpenCalm: () -> Unit,
 ) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     val journals by viewModel.repository.journals.collectAsStateWithLifecycle()
     val contacts by viewModel.repository.contacts.collectAsStateWithLifecycle()
     val limanColors = LocalLimanColors.current
+    val copy = LocalCopy.current
 
     var justLogged by remember { mutableStateOf<MoodFace?>(null) }
 
@@ -111,7 +115,7 @@ fun TodayScreen(
         AnimatedEntrance(delayMillis = 70) {
             LimanCard(Modifier.fillMaxWidth()) {
                 Column(Modifier.padding(18.dp)) {
-                    Text("Bugün nasıl hissediyorsun?", style = MaterialTheme.typography.titleMedium)
+                    Text(copy.moodQuestion, style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(14.dp))
                     MoodFaceRow(
                         selected = justLogged,
@@ -125,7 +129,7 @@ fun TodayScreen(
                             Spacer(Modifier.height(12.dp))
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text(
-                                    "Kaydedildi 🌱",
+                                    copy.moodSaved,
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = limanColors.bondAccent,
                                     modifier = Modifier.weight(1f),
@@ -139,6 +143,35 @@ fun TodayScreen(
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // Sakinleş kısayolu
+        AnimatedEntrance(delayMillis = 110) {
+            LimanCard(
+                Modifier.fillMaxWidth(),
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+                onClick = onOpenCalm,
+            ) {
+                Row(Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        Modifier.size(40.dp).clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.15f)),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        Icon(Icons.Rounded.Spa, null, modifier = Modifier.size(22.dp))
+                    }
+                    Spacer(Modifier.width(12.dp))
+                    Column(Modifier.weight(1f)) {
+                        Text("Bunaldın mı? Bir an dur.", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Sakinleş — topraklanma, nefes ve hızlı destek",
+                            style = MaterialTheme.typography.bodySmall,
+                        )
+                    }
+                    Icon(Icons.AutoMirrored.Rounded.ArrowForward, null)
                 }
             }
         }
@@ -168,7 +201,7 @@ fun TodayScreen(
             ) {
                 Column(Modifier.padding(18.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text("İç dünyan", style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
+                        Text(copy.innerWorldTitle, style = MaterialTheme.typography.titleLarge, modifier = Modifier.weight(1f))
                         LockBadge(size = 20)
                     }
                     Spacer(Modifier.height(10.dp))
@@ -183,7 +216,7 @@ fun TodayScreen(
                     }
                     Spacer(Modifier.height(6.dp))
                     Text(
-                        "Bugüne yaz — savunmasız, mahrem, yalnızca senin.",
+                        copy.innerWorldDesc,
                         style = MaterialTheme.typography.bodySmall,
                     )
                 }
@@ -193,7 +226,7 @@ fun TodayScreen(
         // Bağların kartı
         AnimatedEntrance(delayMillis = 280) {
             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                SectionHeader("Bağların", subtitle = "Sıcak tutmaya değer ilişkiler")
+                SectionHeader("Bağların", subtitle = copy.bondsSubtitle)
                 LimanCard(Modifier.fillMaxWidth(), onClick = onOpenBonds) {
                     Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
                         if (upcomingBirthday != null) {
@@ -220,7 +253,7 @@ fun TodayScreen(
                         }
                         if (upcomingBirthday == null && distant == null) {
                             Text(
-                                "Şimdilik her şey yolunda görünüyor. 💛",
+                                copy.bondsAllGood,
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )

@@ -41,17 +41,10 @@ import com.liman.app.data.model.MoodFace
 import com.liman.app.ui.LimanViewModel
 import com.liman.app.ui.components.BackButton
 import com.liman.app.ui.components.MoodFaceRow
+import com.liman.app.ui.copy.LocalCopy
 import com.liman.app.ui.theme.JournalBodyStyle
 import com.liman.app.ui.theme.JournalTitleStyle
 import com.liman.app.ui.theme.LocalLimanColors
-
-private val gentlePrompts = listOf(
-    "Bugün seni en çok ne zorladı?",
-    "Küçük de olsa neye minnettarsın?",
-    "Şu an bedeninde ne hissediyorsun?",
-    "Kendine söylemek istediğin nazik bir şey?",
-    "Bugünü bir kelimeyle anlatsan?",
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -60,6 +53,7 @@ fun JournalEditorScreen(
     onBack: () -> Unit,
     onSaved: () -> Unit,
 ) {
+    val copy = LocalCopy.current
     var title by remember { mutableStateOf("") }
     var body by remember { mutableStateOf("") }
     var mood by remember { mutableStateOf<MoodFace?>(null) }
@@ -128,7 +122,7 @@ fun JournalEditorScreen(
                 value = body,
                 onValueChange = { body = it },
                 placeholder = {
-                    Text("Bugün aklından ne geçiyor? Olduğu gibi yazabilirsin…", style = JournalBodyStyle)
+                    Text(copy.journalPlaceholder, style = JournalBodyStyle)
                 },
                 textStyle = JournalBodyStyle,
                 colors = immersiveColors(),
@@ -138,10 +132,10 @@ fun JournalEditorScreen(
                     .height(280.dp),
             )
 
-            // Nazik yazı ipuçları
-            Text("Bir başlangıç ister misin?", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            // Yazı ipuçları
+            Text(copy.journalPromptsHint, style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.onSurfaceVariant)
             FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                gentlePrompts.forEach { prompt ->
+                copy.journalPrompts.forEach { prompt ->
                     AssistChip(
                         onClick = {
                             body = if (body.isBlank()) "$prompt\n" else body

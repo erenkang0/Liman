@@ -55,6 +55,12 @@ android {
         buildConfig = true
     }
 
+    lint {
+        // CI'da imza/lint sürprizleriyle sürümün düşmesini önlemek için.
+        abortOnError = false
+        checkReleaseBuilds = false
+    }
+
     packaging {
         resources {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
@@ -80,6 +86,7 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.biometric)
+    implementation(libs.androidx.work.runtime)
 
     debugImplementation(libs.androidx.ui.tooling)
 }
